@@ -4,6 +4,7 @@ import { createClient, RedisClientType } from 'redis';
 
 // TODO - replace this with a different ipfs client
 import { NFTStorage } from 'nft.storage';
+import { CID } from 'nft.storage/src/lib/interface';
 
 export type RedisIPFSOptions = {
   redisUrl: string;
@@ -13,8 +14,11 @@ export type RedisIPFSOptions = {
   ipfsGatewayBaseUrl?: string;
 };
 
-export type RIPWrapped<T> = {
-  cid: string;
+type Wrapper = {
+  cid: CID;
+};
+
+export type RIPWrapped<T> = Wrapper & {
   data: T;
 };
 
@@ -39,13 +43,25 @@ export class RedisIpfsClient {
     this.gatewayUrl = ipfsGatewayBaseUrl || 'https://ipfs.io/ipfs/';
   }
 
-  private async uploadBlobToIPFSAsync<T>(dataToUpload: T) {
-    const dataStr = JSON.stringify(dataToUpload);
-    const blob = new Blob([dataStr], { type: 'application/json' });
-    await this.ipfsClient.storeBlob(blob);
+  private wrapAndStringifyData<T>(dataToWrap: T, config: Wrapper): string {
+    return JSON.stringify({
+      ...config,
+      data: dataToWrap,
+    });
   }
 
-  public async set<T>(key: string, value: T) {}
+  private async _uploadBlobToIPFSAsync<T>(blob: Blob) {
+    const cid = await this.ipfsClient.storeBlob(blob);
+  }
+
+  public async set<T>(key: string, value: T) {
+    const dataStr = JSON.stringify(value);
+    const blob = new Blob([dataStr], { type: 'application/json' });
+    const { cid } = await NFTStorage.encodeBlob(blob);
+    this._uploadBlobToIPFSAsync(blob);
+    const wrapped = this.wrapAndStringifyData(value, { cid });
+    await this.redisClient.set(key, wrapped);
+  }
 
   public async get<T>(key: string): Promise<T> {
     return null as unknown as T;

@@ -5,7 +5,6 @@ import { NFTStorage } from 'nft.storage';
 import { CID } from 'nft.storage/src/lib/interface';
 
 // NOTE: RipDB = Redis IPFS JSON database
-
 // TODO - replace nft.storage with a different ipfs client
 
 export type RipDBClientOptions = {
@@ -132,6 +131,7 @@ export class RipDBClient {
       return wrapped;
     }
 
+    // data not available in the cache, fetch backup from IPFS
     const cid = wrapped.cid;
     const json = await this.fetchJsonFromIPFS<T>(cid);
     const nextWrapped = {
@@ -145,5 +145,26 @@ export class RipDBClient {
     return nextWrapped;
   }
 
-  public async purge(key: string) {}
+  // purge is an explicit function to reclaim some redis space
+  // in favor of the IPFS back up. Use this when data is no longer
+  // "hot" and fast refresh
+  public async purge(key: string) {
+    const wrappedStr = await this.redisClient.get(key);
+    if (!wrappedStr) {
+      return;
+    }
+
+    const wrapped = JSON.parse(wrappedStr) as RipWrapped<any>;
+
+    if (wrapped.cid === 'pending') {
+      throw new Error('Cannot purge redis before IPFS backup is complete');
+    }
+
+    const nextWrapped = {
+      ...wrapped,
+      data: null,
+    };
+
+    await this.redisClient.set(key, JSON.stringify(nextWrapped));
+  }
 }

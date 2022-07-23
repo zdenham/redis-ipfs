@@ -8,8 +8,10 @@
     "@types/cors": "^2.8.12",
     "@types/express": "^4.17.13",
     "cors": "^2.8.5",
+    "cross-fetch": "^3.1.5",
     "dotenv": "^16.0.1",
     "express": "^4.18.1",
+    "nft.storage": "^6.4.1",
     "nodemon": "^2.0.19",
     "ts-node": "^10.9.1"
   }

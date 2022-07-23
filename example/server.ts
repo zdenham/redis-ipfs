@@ -4,11 +4,12 @@ import dotenv from 'dotenv';
 import { NFTStorage } from 'nft.storage';
 import { Blob } from 'node:buffer';
 import cors from 'cors';
+import fetch from 'cross-fetch';
 
 dotenv.config();
-
 const app = express();
 app.use(cors());
+app.use(express.json());
 const port = 3500;
 
 const rip = new RipDBClient({
@@ -17,10 +18,9 @@ const rip = new RipDBClient({
 });
 
 app.post('/set/:key', async (req, res) => {
-  console.log('THE BODY: ', typeof req.body, req.body);
   const startTime = Date.now();
-  const wrappedData = await rip.set(req.params.key, JSON.parse(req.body));
-  const duration = startTime - Date.now();
+  const wrappedData = await rip.set(req.params.key, req.body);
+  const duration = Date.now() - startTime;
 
   const responseBody = {
     wrappedData,
@@ -55,7 +55,7 @@ const rawIPFSClient = new NFTStorage({ token: process.env.IPFS_KEY || '' });
 
 app.post('/ipfs/set', async (req, res) => {
   // slightly modify the data so the comparison is with two different CIDs
-  const body = { ...JSON.parse(req.body), slight: 'modification' };
+  const body = { ...req.body, slight: 'modification' };
   const dataStr = JSON.stringify(body);
 
   const blob = new Blob([dataStr], { type: 'application/json' });
@@ -69,19 +69,16 @@ app.post('/ipfs/set', async (req, res) => {
 });
 
 app.get('/ipfs/get/:key', async (req, res) => {
-  const { default: fetch } = await import('node-fetch');
   // read CID from RIPDB
   const response = await rip.get(req.params.key);
-
   if (!response) {
     throw new Error('No value stored with this key');
   }
   const { cid } = response;
-
   const startTime = Date.now();
-  await fetch(`https://ipfs/io/ipfs/${cid}`);
-  const duration = Date.now() - startTime;
 
+  await fetch(`https://ipfs.io/ipfs/${cid}`);
+  const duration = Date.now() - startTime;
   res.send({ duration });
 });
 

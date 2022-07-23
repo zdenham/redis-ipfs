@@ -31,11 +31,11 @@
         <textarea class="json" id="setValue"></textarea>
         <div class="timeVals">
           <div id="setBenchmark">
-            <div class="timeMs"></div>
+            <div class="timeMs">N/A</div>
             <div class="timeLabel">RIP set time ms</div>
           </div>
           <div id="setBenchmarkIPFS">
-            <div class="timeMs"></div>
+            <div class="timeMs">N/A</div>
             <div class="timeLabel">IPFS upload time ms</div>
           </div>
           <button onclick="runSet()">Set Data</button>
@@ -48,11 +48,11 @@
         <textarea class="json" id="getValue"></textarea>
         <div class="timeVals">
           <div id="getBenchmark">
-            <div class="timeMs"></div>
+            <div class="timeMs">N/A</div>
             <div class="timeLabel">RIP get time ms</div>
           </div>
           <div id="getBenchmarkIPFS">
-            <div class="timeMs"></div>
+            <div class="timeMs">N/A</div>
             <div class="timeLabel">IPFS fetch time ms</div>
           </div>
           <button onclick="runGet()">Get Data</button>
@@ -102,6 +102,7 @@
 
       .timeVals {
         display: flex;
+        align-items: center;
         flex-direction: row;
         width: 100%;
         justify-content: space-between;
@@ -142,6 +143,10 @@
       .ripDBImage {
         width: 300px;
         height: 300px;
+      }
+
+      .timeMs {
+        font-size: 25px;
       }
 
       .imageWrapper {
@@ -185,8 +190,6 @@
     <script>
       const baseUrl = 'http://localhost:3500';
 
-      let currentSetCid = '';
-
       const runSet = async () => {
         const key = document.getElementById('setKey').value;
         const value = document.getElementById('setValue').value;
@@ -202,17 +205,14 @@
         const resPromise = fetch(`${baseUrl}/set/${key}`, opts);
         const res2Promise = fetch(`${baseUrl}/ipfs/set`, opts);
 
-        // TODO - display timestamps in the UI returned from here
         const res = await resPromise;
         const json = await res.json();
-        console.log('THE SET JSON 1: ', json);
-        document.getElementById('setBenchMark').children[0].innerText =
+        document.getElementById('setBenchmark').children[0].innerText =
           json.duration.toString();
 
         const res2 = await res2Promise;
         const json2 = await res2.json();
-        console.log('THE SET JSON 2: ', json2);
-        document.getElementById('setBenchMarkIPFS').children[0].innerText =
+        document.getElementById('setBenchmarkIPFS').children[0].innerText =
           json2.duration.toString();
       };
 
@@ -222,22 +222,35 @@
         const resPromise = fetch(`${baseUrl}/get/${key}`);
         const res2Promise = fetch(`${baseUrl}/ipfs/get/${key}`);
 
-        const res = await resPromise();
+        const res = await resPromise;
         const json = await res.json();
-        console.log('THE GET JSON 1', json);
-        document.getElementById('getBenchMark').children[0].innerText =
+
+        document.getElementById('getBenchmark').children[0].innerText =
           json.duration.toString();
-        const res2 = await res2Promise();
+
+        document.getElementById('getValue').value = JSON.stringify(
+          json.wrappedData,
+          null,
+          2
+        );
+
+        const res2 = await res2Promise;
         const json2 = await res2.json();
-        console.log('THE GET JSON 1', json2);
-        document.getElementById('getBenchMarkIPFS').children[0].innerText =
+
+        document.getElementById('getBenchmarkIPFS').children[0].innerText =
           json2.duration.toString();
       };
 
       const runPurge = async () => {
         const key = document.getElementById('purgeKey').value;
-        const res = await fetch(`${baseUrl}/purge/${key}`);
-        // TODO - display some ish
+        const res = await fetch(`${baseUrl}/purge/${key}`, { method: 'POST' });
+
+        const getDisplay = document.getElementById('getValue');
+
+        if (getDisplay.value.length > 0) {
+          const next = { ...JSON.parse(getDisplay.value), data: '' };
+          getDisplay.value = JSON.stringify(next, null, 2);
+        }
       };
 
       const fetchSampleJSON = async () => {

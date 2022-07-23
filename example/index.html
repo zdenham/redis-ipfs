@@ -20,39 +20,51 @@
         <h1>Try it out!</h1>
         <p>
           Rip has three functions (for now). Set, Get, and Purge. The following
-          demo shows how you can use Rip for simple JSON storage for your web3
+          demo shows how you can use RIP as simple JSON storage for your web3
           app. The following demo interfaces with a live RipDB instance.
         </p>
         <h2>Set</h2>
         <hr />
         <h3>Key</h3>
-        <input type="text" value="exampleKey" />
+        <input type="text" value="exampleKey" id="setKey" />
         <h3>Value</h3>
-        <textarea class="json" id="jsonInputTextArea"></textarea>
+        <textarea class="json" id="setValue"></textarea>
         <div class="timeVals">
-          <div></div>
-          <div></div>
-          <button>Set Data</button>
+          <div id="setBenchmark">
+            <div class="timeMs"></div>
+            <div class="timeLabel">RIP set time ms</div>
+          </div>
+          <div id="setBenchmarkIPFS">
+            <div class="timeMs"></div>
+            <div class="timeLabel">IPFS upload time ms</div>
+          </div>
+          <button onclick="runSet()">Set Data</button>
         </div>
         <h2>Get</h2>
         <hr />
         <h3>Key</h3>
-        <input type="text" value="exampleKey" />
+        <input type="text" value="exampleKey" id="getKey" />
         <h3>Value</h3>
         <textarea class="json"></textarea>
         <div class="timeVals">
-          <div></div>
-          <div></div>
-          <button>Get Data</button>
+          <div id="getBenchmark">
+            <div class="timeMs"></div>
+            <div class="timeLabel">RIP get time ms</div>
+          </div>
+          <div id="getBenchmarkIPFS">
+            <div class="timeMs"></div>
+            <div class="timeLabel">IPFS fetch time ms</div>
+          </div>
+          <button onclick="runGet()">Get Data</button>
         </div>
         <h2>Purge</h2>
         <hr />
         <h3>Key</h3>
-        <input type="text" value="exampleKey" />
+        <input type="text" value="exampleKey" id="purgeKey" />
         <div class="timeVals">
           <div></div>
           <div></div>
-          <button>Purge Cache</button>
+          <button onclick="runPurge()">Purge Cache</button>
         </div>
       </div>
     </div>
@@ -122,6 +134,11 @@
         text-align: center;
       }
 
+      .timeLabel {
+        color: grey;
+        font-size: 14px;
+      }
+
       .ripDBImage {
         width: 300px;
         height: 300px;
@@ -166,13 +183,59 @@
     </style>
 
     <script>
-      const runGetFetch = async () => {};
+      const baseUrl = 'http://localhost:3500';
+
+      let currentSetCid = '';
+
+      const runSet = async () => {
+        const key = document.getElementById('setKey').value;
+        const value = document.getElementById('setValue').value;
+
+        const opts = {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: value,
+        };
+
+        const resPromise = fetch(`${baseUrl}/set/${key}`, opts);
+        const res2Promise = fetch(`${baseUrl}/ipfs/set`, opts);
+
+        // TODO - display timestamps in the UI returned from here
+        const res = await resPromise;
+        const json = await res.json();
+        console.log('THE SET JSON 1: ', json);
+        const res2 = await res2Promise;
+        const json2 = await res2.json();
+        console.log('THE SET JSON 2: ', json2);
+      };
+
+      const runGet = async () => {
+        const key = document.getElementById('getKey').value;
+
+        const resPromise = fetch(`${baseUrl}/get/${key}`);
+        const res2Promise = fetch(`${baseUrl}/ipfs/get/${key}`);
+
+        const res = await resPromise();
+        const json = await res.json();
+        console.log('THE GET JSON 1', json);
+        const res2 = await res2Promise();
+        const json2 = await res2.json();
+        console.log('THE GET JSON 1', json2);
+      };
+
+      const runPurge = async () => {
+        const key = document.getElementById('purgeKey').value;
+        const res = await fetch(`${baseUrl}/purge/${key}`);
+        // TODO - display some ish
+      };
 
       const fetchSampleJSON = async () => {
         const res = await fetch('/json/example.json');
         const json = await res.json();
         const text = JSON.stringify(json, null, 2);
-        document.getElementById('jsonInputTextArea').value = text;
+        document.getElementById('setValue').value = text;
       };
 
       fetchSampleJSON();

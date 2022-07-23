@@ -72,6 +72,30 @@
           <button onclick="runPurge()">Purge Cache</button>
         </div>
       </div>
+      <h1>🔥 🔥 🔥 🔥 🔥 🔥 🔥 🔥 🔥 🔥 🔥 🔥 🔥 🔥 🔥 🔥 🔥 🔥 🔥</h1>
+      <h1>Encryption</h1>
+      <button id="litConnectButton" onclick="connectLit()">
+        Connect to Encrypt Data
+      </button>
+      <h2>Encrypted Set</h2>
+      <hr />
+      <h3>Key</h3>
+      <input type="text" value="exampleKey" id="encryptedSetKey" />
+      <h3>Value</h3>
+      <div style="height: 300px">
+        <textarea class="json" id="encryptedSetValue"></textarea>
+      </div>
+      <div class="timeVals">
+        <div id="setBenchmark">
+          <div class="timeMs">N/A</div>
+          <div class="timeLabel">RIP set time ms</div>
+        </div>
+        <div id="setBenchmarkIPFS">
+          <div class="timeMs">N/A</div>
+          <div class="timeLabel">IPFS upload time ms</div>
+        </div>
+        <button onclick="runEncryptAndSet()">Encrypt and Set Data</button>
+      </div>
     </div>
 
     <style>
@@ -116,6 +140,7 @@
       .json {
         width: 100%;
         height: 300px;
+        min-height: 300px;
         color: black;
         background: #f9f9f9;
         padding: 15px;
@@ -263,6 +288,7 @@
         const json = await res.json();
         const text = JSON.stringify(json, null, 2);
         document.getElementById('setValue').value = text;
+        document.getElementById('encryptedSetValue').value = text;
       };
 
       const onSetKeyChange = (e) => {
@@ -271,7 +297,27 @@
         document.getElementById('purgeKey').value = value;
       };
 
+      // LIT PROTOCOL STUFF HERE
+
+      let authSig;
+      const connectLit = async () => {
+        authSig = await LitJsSdk.checkAndSignAuthMessage({
+          chain: 'ethereum',
+        });
+      };
+
+      const runEncryptAndSet = async () => {
+        const currData = document.getElementById('encryptedSetValue').value;
+        const { encryptedString, symmetricKey } = await LitJsSdk.encryptString(
+          currData
+        );
+      };
+
       fetchSampleJSON();
     </script>
+    <script
+      onload="LitJsSdk.litJsSdkLoadedInALIT()"
+      src="https://jscdn.litgateway.com/index.web.js"
+    ></script>
   </body>
 </html>

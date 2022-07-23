@@ -9,6 +9,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@types/async-retry": "^1.4.4",
     "async-retry": "^1.3.3",
     "nft.storage": "^6.4.1",
     "node-fetch": "^3.2.9",

@@ -1,8 +1,8 @@
 import { createClient, RedisClientType } from 'redis';
-import fetch from 'node-fetch';
 import retry from 'async-retry';
 import { NFTStorage } from 'nft.storage';
 import { CID } from 'nft.storage/src/lib/interface';
+import { Blob } from 'node:buffer';
 
 // NOTE: RipDB = Redis IPFS JSON database
 // TODO - replace nft.storage with a different ipfs client
@@ -62,6 +62,7 @@ export class RipDBClient {
   ) {
     const dataStr = JSON.stringify(value);
     const blob = new Blob([dataStr], { type: 'application/json' });
+    // @ts-ignore
     const cid = await this.ipfsClient.storeBlob(blob);
 
     // If the setAtTimestamps differ then The data has been
@@ -89,8 +90,9 @@ export class RipDBClient {
       throw new Error('Cannot fetch from IPFS, backup is pending');
     }
 
-    return await retry(
+    const awaited = await retry(
       async (bail) => {
+        const { default: fetch } = await import('node-fetch');
         // if anything throws, we retry
         const res = await fetch(`${this.gatewayUrl}/${cid}`);
 
@@ -108,6 +110,12 @@ export class RipDBClient {
         maxTimeout: 5 * 60 * 1000, // 5 minutes
       }
     );
+
+    if (!awaited) {
+      throw new Error('Failed to fetch from IPFS');
+    }
+
+    return awaited;
   }
 
   public async set<T>(key: string, value: T): Promise<RipWrapped<T>> {

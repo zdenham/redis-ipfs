@@ -5,7 +5,7 @@ import { NFTStorage } from 'nft.storage';
 import { Blob } from 'node:buffer';
 import cors from 'cors';
 import fetch from 'cross-fetch';
-import LitJsSdk from 'lit-js-sdk';
+// import LitJsSdk from 'lit-js-sdk';
 
 dotenv.config();
 const app = express();

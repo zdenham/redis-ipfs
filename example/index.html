@@ -304,12 +304,53 @@
         authSig = await LitJsSdk.checkAndSignAuthMessage({
           chain: 'ethereum',
         });
+
+        console.log('AUTH SIG: ', authSig);
       };
 
       const runEncryptAndSet = async () => {
         const currData = document.getElementById('encryptedSetValue').value;
+
+        console.log('CURRDATA: ', typeof currData, currData);
         const { encryptedString, symmetricKey } = await LitJsSdk.encryptString(
           currData
+        );
+
+        console.log('ENCRYPTED??', encryptedString);
+
+        // gate it to the connected user
+        const accessControlConditions = [
+          {
+            contractAddress: '',
+            standardContractType: '',
+            chain: 'ethereum',
+            method: '',
+            parameters: [':userAddress'],
+            returnValueTest: {
+              comparator: '=',
+              value: authSig.address,
+            },
+          },
+        ];
+
+        const encryptedSymmetricKey =
+          await window.litNodeClient.saveEncryptionKey({
+            accessControlConditions,
+            symmetricKey,
+            authSig,
+            chain: 'ethereum',
+          });
+
+        const setData = {
+          ownerAddress: authSig.address,
+          encryptedSymmetricKey: encryptedSymmetricKey.toString(),
+          encryptedData: await encryptedString.text(),
+        };
+
+        document.getElementById('encryptedSetValue').value = JSON.stringify(
+          setData,
+          null,
+          2
         );
       };
 

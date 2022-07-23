@@ -5,6 +5,175 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   </head>
   <body>
-    Content goes here.
+    <div class="half">
+      <div class="imageWrapper">
+        <img class="ripDBImage" src="/images/RipDB.png" />
+      </div>
+      <h1 class="mainText">
+        RipDB is a dead simple, fast, decentralized <br />
+        JSON store built for web3.
+      </h1>
+      <p class="sub">Redis + IPFS = RIP = 😍</p>
+    </div>
+    <div class="secondHalf">
+      <div class="secondHalfInner">
+        <h1>Try it out!</h1>
+        <p>
+          Rip has three functions (for now). Set, Get, and Purge. The following
+          demo shows how you can use Rip for simple JSON storage for your web3
+          app. The following demo interfaces with a live RipDB instance.
+        </p>
+        <h2>Set</h2>
+        <hr />
+        <h3>Key</h3>
+        <input type="text" value="exampleKey" />
+        <h3>Value</h3>
+        <textarea class="json" id="jsonInputTextArea"></textarea>
+        <div class="timeVals">
+          <div></div>
+          <div></div>
+          <button>Set Data</button>
+        </div>
+        <h2>Get</h2>
+        <hr />
+        <h3>Key</h3>
+        <input type="text" value="exampleKey" />
+        <h3>Value</h3>
+        <textarea class="json"></textarea>
+        <div class="timeVals">
+          <div></div>
+          <div></div>
+          <button>Get Data</button>
+        </div>
+        <h2>Purge</h2>
+        <hr />
+        <h3>Key</h3>
+        <input type="text" value="exampleKey" />
+        <div class="timeVals">
+          <div></div>
+          <div></div>
+          <button>Purge Cache</button>
+        </div>
+      </div>
+    </div>
+
+    <style>
+      html,
+      body {
+        font-family: 'Roboto', sans-serif;
+      }
+
+      input {
+        width: 300px;
+        padding: 10px;
+        border-radius: 6px;
+        border: 1px solid lightgrey;
+      }
+
+      hr {
+        width: 100%;
+        border: none;
+        border-bottom: 1px dashed lightgrey;
+      }
+
+      button {
+        background: black;
+        border-radius: 5px;
+        color: white;
+        padding: 12px 35px;
+        font-weight: bold;
+        font-size: 16px;
+        border: none;
+        cursor: pointer;
+        margin: 25px 0px;
+      }
+
+      .timeVals {
+        display: flex;
+        flex-direction: row;
+        width: 100%;
+        justify-content: space-between;
+      }
+
+      .json {
+        width: 100%;
+        height: 300px;
+        color: black;
+        background: #f9f9f9;
+        padding: 15px;
+        border-radius: 15px;
+        border: 1px solid lightgrey;
+        box-sizing: border-box;
+      }
+
+      .json::-webkit-scrollbar {
+        display: none;
+      }
+
+      .sub {
+        font-size: 22px;
+        color: white;
+        text-align: center;
+      }
+
+      .mainText {
+        margin-top: 50px;
+        width: 700px;
+        text-align: center;
+      }
+
+      .ripDBImage {
+        width: 300px;
+        height: 300px;
+      }
+
+      .imageWrapper {
+        padding: 30px 50px;
+        border-radius: 30px;
+        background: white;
+      }
+
+      .half {
+        color: white;
+        width: 50vw;
+        height: 100vh;
+        position: fixed;
+        flex-direction: column;
+        top: 0px;
+        left: 0px;
+        bottom: 0px;
+        background: black;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      .secondHalf {
+        position: fixed;
+        top: 0px;
+        right: 0px;
+        bottom: 0px;
+        width: 50vw;
+        height: 100vh;
+        overflow-y: scroll;
+        overflow-x: hidden;
+        display: flex;
+        flex-direction: column;
+        padding: 50px;
+        color: black;
+        box-sizing: border-box;
+      }
+    </style>
+
+    <script>
+      const fetchSampleJSON = async () => {
+        const res = await fetch('/json/example.json');
+        const json = await res.json();
+        const text = JSON.stringify(json, null, 2);
+        document.getElementById('jsonInputTextArea').value = text;
+      };
+
+      fetchSampleJSON();
+    </script>
   </body>
 </html>

@@ -2,10 +2,13 @@ import express from 'express';
 import { RipDBClient } from '../library';
 import dotenv from 'dotenv';
 import { NFTStorage } from 'nft.storage';
+import { Blob } from 'node:buffer';
+import cors from 'cors';
 
 dotenv.config();
 
 const app = express();
+app.use(cors());
 const port = 3500;
 
 const rip = new RipDBClient({
@@ -54,6 +57,7 @@ app.post('/ipfs/set', async (req, res) => {
   // slightly modify the data so the comparison is with two different CIDs
   const body = { ...JSON.parse(req.body), slight: 'modification' };
   const dataStr = JSON.stringify(body);
+
   const blob = new Blob([dataStr], { type: 'application/json' });
 
   const startTime = Date.now();

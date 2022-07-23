@@ -45,7 +45,7 @@
         <h3>Key</h3>
         <input type="text" value="exampleKey" id="getKey" />
         <h3>Value</h3>
-        <textarea class="json"></textarea>
+        <textarea class="json" id="getValue"></textarea>
         <div class="timeVals">
           <div id="getBenchmark">
             <div class="timeMs"></div>
@@ -206,9 +206,14 @@
         const res = await resPromise;
         const json = await res.json();
         console.log('THE SET JSON 1: ', json);
+        document.getElementById('setBenchMark').children[0].innerText =
+          json.duration.toString();
+
         const res2 = await res2Promise;
         const json2 = await res2.json();
         console.log('THE SET JSON 2: ', json2);
+        document.getElementById('setBenchMarkIPFS').children[0].innerText =
+          json2.duration.toString();
       };
 
       const runGet = async () => {
@@ -220,9 +225,13 @@
         const res = await resPromise();
         const json = await res.json();
         console.log('THE GET JSON 1', json);
+        document.getElementById('getBenchMark').children[0].innerText =
+          json.duration.toString();
         const res2 = await res2Promise();
         const json2 = await res2.json();
         console.log('THE GET JSON 1', json2);
+        document.getElementById('getBenchMarkIPFS').children[0].innerText =
+          json2.duration.toString();
       };
 
       const runPurge = async () => {

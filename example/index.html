@@ -34,7 +34,8 @@
         <h3>Value</h3>
         <p>
           The JSON data to be stored. Click
-          <button>here</button> to generate new dummy data
+          <button onclick="createDummyData()">here</button> to generate new
+          dummy data
         </p>
         <textarea class="json" disabled id="setValue"></textarea>
         <div class="timeVals">
@@ -136,7 +137,7 @@
           onclick="runDecryptedGet()"
         >
           <div class="hidden"></div>
-          <div>Get Data</div>
+          <div>Get and Decrypt Data</div>
         </button>
       </div>
     </div>
@@ -379,12 +380,31 @@
         }
       };
 
-      const init = async () => {
-        const res = await fetch('/json/example.json');
-        const json = await res.json();
+      const createDummyData = () => {
+        const dummyArray = new Array(70).fill(1).map(() => {
+          return {
+            ens: `${(Math.random() + 1).toString(36).substring(2)}.eth`,
+            address: `0x${(Math.random() + 1).toString(36).substring(2)}`,
+          };
+        });
+
+        const json = {
+          allowListAddresses: [
+            {
+              ens: 'vitalik.eth',
+              address: '0xd8da6bf26964af9d7eed9e03e53415d37aa96045',
+            },
+            ...dummyArray,
+          ],
+        };
+
         const text = JSON.stringify(json, null, 2);
         document.getElementById('setValue').value = text;
         document.getElementById('encryptedSetValue').value = text;
+      };
+
+      const init = async () => {
+        createDummyData();
 
         const keyValue =
           'exampleKey-' + (Math.random() + 1).toString(36).substring(7);
@@ -494,7 +514,7 @@
       };
 
       const runDecryptedGet = async () => {
-        startLoadingButton('runEncryptedGetButton');
+        startLoadingButton('runDecryptedGetButon');
         const key = document.getElementById('decryptedGetKey').value;
         const res = await fetch(`${baseUrl}/get/${key}`);
 
@@ -532,7 +552,7 @@
         );
 
         document.getElementById('decryptedGetValue').value = decryptedString;
-        stopLoadingButton('runEncryptedGetButton');
+        stopLoadingButton('runDecryptedGetButon');
       };
 
       init();

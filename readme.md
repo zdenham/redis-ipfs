@@ -23,7 +23,7 @@ I wanted Rip to feel like web based localstorage, but with decentralization and 
 
 ## Usage from browser js client
 
-```
+```javascript
 // Setting up client
 import { RipClient } from './RipClient'
 const ripServerEndpointUrl = '';

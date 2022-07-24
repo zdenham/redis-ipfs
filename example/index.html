@@ -33,7 +33,7 @@
           oninput="onSetKeyChange()"
         />
         <h3>Value</h3>
-        <textarea class="json" id="setValue"></textarea>
+        <textarea class="json" disabled id="setValue"></textarea>
         <div class="timeVals">
           <div id="setBenchmark">
             <div class="timeMs">N/A</div>
@@ -43,14 +43,17 @@
             <div class="timeMs">N/A</div>
             <div class="timeLabel">IPFS upload time ms</div>
           </div>
-          <button onclick="runSet()">Set Data</button>
+          <button id="runSetButton" onclick="runSet()">
+            <div class="hidden"></div>
+            <div>Set Data</div>
+          </button>
         </div>
         <h2>Get</h2>
         <hr />
         <h3>Key</h3>
         <input type="text" value="exampleKey" id="getKey" />
         <h3>Value</h3>
-        <textarea class="json" id="getValue"></textarea>
+        <textarea class="json" disabled id="getValue"></textarea>
         <div class="timeVals">
           <div id="getBenchmark">
             <div class="timeMs">N/A</div>
@@ -60,7 +63,10 @@
             <div class="timeMs">N/A</div>
             <div class="timeLabel">IPFS fetch time ms</div>
           </div>
-          <button onclick="runGet()">Get Data</button>
+          <button onclick="runGet()" id="runGetButton">
+            <div class="hidden"></div>
+            <div>Get Data</div>
+          </button>
         </div>
         <h2>Purge</h2>
         <hr />
@@ -69,7 +75,10 @@
         <div class="timeVals">
           <div></div>
           <div></div>
-          <button onclick="runPurge()">Purge Cache</button>
+          <button onclick="runPurge()" id="runPurgeButton">
+            <div class="hidden"></div>
+            <div>Purge Cache</div>
+          </button>
         </div>
       </div>
       <h1>🔥 🔥 🔥 🔥 🔥 🔥 🔥 🔥 🔥 🔥 🔥 🔥 🔥 🔥 🔥 🔥 🔥 🔥 🔥</h1>
@@ -83,7 +92,7 @@
       <input type="text" value="exampleKey" id="encryptedSetKey" />
       <h3>Value</h3>
       <div style="height: 300px">
-        <textarea class="json" id="encryptedSetValue"></textarea>
+        <textarea class="json" disabled id="encryptedSetValue"></textarea>
       </div>
       <div class="timeVals">
         <div id="encryptedSetBenchmark">
@@ -94,14 +103,17 @@
           <div class="timeMs">N/A</div>
           <div class="timeLabel">IPFS upload time ms</div>
         </div>
-        <button onclick="runEncryptedSet()">Encrypt and Set Data</button>
+        <button id="runEncryptedSetButton" onclick="runEncryptedSet()">
+          <div class="hidden"></div>
+          <div>Encrypt and Set Data</div>
+        </button>
       </div>
       <h2>Decrypted Get</h2>
       <hr />
       <h3>Key</h3>
       <input type="text" value="exampleKey" id="decryptedGetKey" />
       <h3>Value</h3>
-      <textarea class="json" id="decryptedGetValue"></textarea>
+      <textarea class="json" disabled id="decryptedGetValue"></textarea>
       <div class="timeVals">
         <div id="decryptedGetBenchmark">
           <div class="timeMs">N/A</div>
@@ -111,7 +123,10 @@
           <div class="timeMs">N/A</div>
           <div class="timeLabel">IPFS fetch time ms</div>
         </div>
-        <button onclick="runDecryptedGet()">Get Data</button>
+        <button id="runDecryptedGetButon" onclick="runDecryptedGet()">
+          <div class="hidden"></div>
+          <div>Get Data</div>
+        </button>
       </div>
     </div>
 
@@ -119,6 +134,10 @@
       html,
       body {
         font-family: 'Roboto', sans-serif;
+      }
+
+      .hidden {
+        display: none;
       }
 
       input {
@@ -232,12 +251,57 @@
         color: black;
         box-sizing: border-box;
       }
+
+      .lds-dual-ring {
+        margin-right: 5px;
+        display: inline-block;
+        width: 20px;
+        height: 20px;
+      }
+
+      .lds-dual-ring:after {
+        content: ' ';
+        display: block;
+        width: 16px;
+        height: 16px;
+        margin: 2px;
+        border-radius: 50%;
+        border: 3px solid #fff;
+        border-color: #fff transparent #fff transparent;
+        animation: lds-dual-ring 1.2s linear infinite;
+      }
+
+      @keyframes lds-dual-ring {
+        0% {
+          transform: rotate(0deg);
+        }
+        100% {
+          transform: rotate(360deg);
+        }
+      }
     </style>
 
     <script>
       const baseUrl = 'http://localhost:3500';
 
+      const startLoadingButton = (id) => {
+        const button = document.getElementById(id);
+        const loader = button.children[0];
+        loader.className = 'lds-dual-ring';
+        const content = button.children[1];
+        content.className = 'hidden';
+      };
+
+      const stopLoadingButton = (id) => {
+        const button = document.getElementById(id);
+        const loader = button.children[0];
+        loader.className = 'hidden';
+        const content = button.children[1];
+        content.className = '';
+      };
+
       const runSet = async () => {
+        startLoadingButton('runSetButton');
         const key = document.getElementById('setKey').value;
         const value = document.getElementById('setValue').value;
 
@@ -261,9 +325,11 @@
         const json2 = await res2.json();
         document.getElementById('setBenchmarkIPFS').children[0].innerText =
           json2.duration.toString();
+        stopLoadingButton('runSetButton');
       };
 
       const runGet = async () => {
+        startLoadingButton('runGetButton');
         const key = document.getElementById('getKey').value;
 
         const resPromise = fetch(`${baseUrl}/get/${key}`);
@@ -286,6 +352,8 @@
 
         document.getElementById('getBenchmarkIPFS').children[0].innerText =
           json2.duration.toString();
+
+        stopLoadingButton('runGetButton');
       };
 
       const runPurge = async () => {
@@ -324,7 +392,8 @@
           chain: 'ethereum',
         });
 
-        console.log('AUTH SIG: ', authSig);
+        document.getElementById('litConnectButton').innerText =
+          '✅ Connected and Ready to Encrypt ✅';
       };
 
       const getDataUrl = (blob) => {
@@ -345,6 +414,7 @@
       };
 
       const runEncryptedSet = async () => {
+        startLoadingButton('runEncryptedSetButton');
         const key = document.getElementById('encryptedSetKey').value;
         const currData = document.getElementById('encryptedSetValue').value;
 
@@ -375,9 +445,7 @@
             chain: 'ethereum',
           });
 
-        console.log('THE BLOB BEFORE: ', encryptedString);
         const encryptedData = await getDataUrl(encryptedString);
-
         const setData = JSON.stringify(
           {
             ownerAddress: authSig.address,
@@ -402,9 +470,11 @@
         };
         const res = await fetch(`${baseUrl}/set/${key}`, opts);
         const json = await res.json();
+        stopLoadingButton('runEncryptedSetButton');
       };
 
       const runDecryptedGet = async () => {
+        startLoadingButton('runEncryptedGetButton');
         const key = document.getElementById('decryptedGetKey').value;
         const res = await fetch(`${baseUrl}/get/${key}`);
 
@@ -442,6 +512,7 @@
         );
 
         document.getElementById('decryptedGetValue').value = decryptedString;
+        stopLoadingButton('runEncryptedGetButton');
       };
 
       fetchSampleJSON();

@@ -1,6 +1,6 @@
 # RipDB (Redis + IPfs = RIP)
 
-RipDB is a dead simple, fast, decentralized JSON store and corresponding javascript client perfect for fast moving web3 builders.
+RipDB is a dead simple, fast, decentralized JSON store perfect for fast moving web3 builders. It comes with a javascript client that feels like localstorage, but has decentralization and encryption baked in.
 
 ![img](https://i.imgur.com/8KVnLX3.png)
 

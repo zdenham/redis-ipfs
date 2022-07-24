@@ -86,15 +86,32 @@
         <textarea class="json" id="encryptedSetValue"></textarea>
       </div>
       <div class="timeVals">
-        <div id="setBenchmark">
+        <div id="encryptedSetBenchmark">
           <div class="timeMs">N/A</div>
           <div class="timeLabel">RIP set time ms</div>
         </div>
-        <div id="setBenchmarkIPFS">
+        <div id="encryptedSetBenchmarkIPFS">
           <div class="timeMs">N/A</div>
           <div class="timeLabel">IPFS upload time ms</div>
         </div>
-        <button onclick="runEncryptAndSet()">Encrypt and Set Data</button>
+        <button onclick="runEncryptedSet()">Encrypt and Set Data</button>
+      </div>
+      <h2>Decrypted Get</h2>
+      <hr />
+      <h3>Key</h3>
+      <input type="text" value="exampleKey" id="decryptedGetKey" />
+      <h3>Value</h3>
+      <textarea class="json" id="decryptedGetValue"></textarea>
+      <div class="timeVals">
+        <div id="decryptedGetBenchmark">
+          <div class="timeMs">N/A</div>
+          <div class="timeLabel">RIP get time ms</div>
+        </div>
+        <div id="decryptedGetBenchmarkIPFS">
+          <div class="timeMs">N/A</div>
+          <div class="timeLabel">IPFS fetch time ms</div>
+        </div>
+        <button onclick="runDecryptedGet()">Get Data</button>
       </div>
     </div>
 
@@ -295,6 +312,8 @@
         const value = document.getElementById('setKey').value;
         document.getElementById('getKey').value = value;
         document.getElementById('purgeKey').value = value;
+        document.getElementById('encryptedSetKey').value = value;
+        document.getElementById('decryptedGetKey').value = value;
       };
 
       // LIT PROTOCOL STUFF HERE
@@ -308,15 +327,30 @@
         console.log('AUTH SIG: ', authSig);
       };
 
-      const runEncryptAndSet = async () => {
+      const getDataUrl = (blob) => {
+        return new Promise((resolve) => {
+          const fr = new FileReader();
+
+          fr.addEventListener(
+            'load',
+            function () {
+              // convert image file to base64 string
+              resolve(fr.result);
+            },
+            false
+          );
+
+          fr.readAsDataURL(blob);
+        });
+      };
+
+      const runEncryptedSet = async () => {
+        const key = document.getElementById('encryptedSetKey').value;
         const currData = document.getElementById('encryptedSetValue').value;
 
-        console.log('CURRDATA: ', typeof currData, currData);
         const { encryptedString, symmetricKey } = await LitJsSdk.encryptString(
           currData
         );
-
-        console.log('ENCRYPTED??', encryptedString);
 
         // gate it to the connected user
         const accessControlConditions = [
@@ -341,17 +375,73 @@
             chain: 'ethereum',
           });
 
-        const setData = {
-          ownerAddress: authSig.address,
-          encryptedSymmetricKey: encryptedSymmetricKey.toString(),
-          encryptedData: await encryptedString.text(),
-        };
+        console.log('THE BLOB BEFORE: ', encryptedString);
+        const encryptedData = await getDataUrl(encryptedString);
 
-        document.getElementById('encryptedSetValue').value = JSON.stringify(
-          setData,
+        const setData = JSON.stringify(
+          {
+            ownerAddress: authSig.address,
+            encryptedSymmetricKey: LitJsSdk.uint8arrayToString(
+              encryptedSymmetricKey,
+              'base16'
+            ),
+            encryptedData,
+          },
           null,
           2
         );
+
+        document.getElementById('encryptedSetValue').value = setData;
+
+        const opts = {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: setData,
+        };
+        const res = await fetch(`${baseUrl}/set/${key}`, opts);
+        const json = await res.json();
+      };
+
+      const runDecryptedGet = async () => {
+        const key = document.getElementById('decryptedGetKey').value;
+        const res = await fetch(`${baseUrl}/get/${key}`);
+
+        const json = await res.json();
+
+        const { encryptedData, encryptedSymmetricKey, ownerAddress } =
+          json.wrappedData.data;
+
+        const accessControlConditions = [
+          {
+            contractAddress: '',
+            standardContractType: '',
+            chain: 'ethereum',
+            method: '',
+            parameters: [':userAddress'],
+            returnValueTest: {
+              comparator: '=',
+              value: ownerAddress,
+            },
+          },
+        ];
+
+        const symmetricKey = await this.litNodeClient.getEncryptionKey({
+          accessControlConditions,
+          toDecrypt: encryptedSymmetricKey,
+          chain: 'ethereum',
+          authSig,
+        });
+
+        const blob = await (await fetch(encryptedData)).blob();
+
+        const decryptedString = await LitJsSdk.decryptString(
+          blob,
+          symmetricKey
+        );
+
+        document.getElementById('decryptedGetValue').value = decryptedString;
       };
 
       fetchSampleJSON();

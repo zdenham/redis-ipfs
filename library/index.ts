@@ -19,13 +19,19 @@ export type RipDBClientOptions = {
 export type Wrapper = {
   cid: CID | 'pending';
   setAtTimestamp?: number;
-  authAddress?: string[];
-  encrypted?: boolean;
 };
 
 export type RipWrapped<T> = Wrapper & {
   data: T | null;
 };
+
+export type SetBody =
+  | {
+      encryptedSymmetricKey: string;
+      encryptedData: string;
+      ownerAddress: string;
+    }
+  | {};
 
 export class RipDBClient {
   private redisClient: RedisClientType;
@@ -121,7 +127,10 @@ export class RipDBClient {
     return awaited;
   }
 
-  public async set<T>(key: string, value: T): Promise<RipWrapped<T>> {
+  public async set<T extends SetBody>(
+    key: string,
+    value: T
+  ): Promise<RipWrapped<T>> {
     const wrapped = this.wrapData(value, { cid: 'pending' });
     await this.redisClient.set(key, JSON.stringify(wrapped));
 

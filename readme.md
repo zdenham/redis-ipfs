@@ -1,6 +1,6 @@
 # RipDB (Redis + IPfs = RIP)
 
-RipDB is a dead simple, fast, decentralized JSON store perfect for fast moving web3 builders. It comes with a javascript client that feels like localstorage, but has decentralization and encryption baked in.
+RipDB is a dead simple, snappy, decentralized JSON store perfect for fast moving web3 builders. It comes with a javascript client that feels like using localstorage, but has decentralization and encryption baked in.
 
 ![img](https://i.imgur.com/8KVnLX3.png)
 
@@ -19,7 +19,11 @@ Here are some problems with setting up a db for your dapp
 5. They usually don't give users provenance over their data
 6. Encryption / key management is a pain
 
-I wanted Rip to feel like web based localstorage, but with decentralization and encryption baked in. I think its getting there and I'm very excited to use it in my upcoming projects!
+If a traditional db seems overkill for your use case, RIP might be for you. It gives you the speed of in memory cache (redis) but the decentralization of a global netowrk (Filecoin + IPFS).
+
+### Example use case
+
+In my own project (https://juicelabs.io), I needed some sort of store for a list of allowlist addresses (to calculate merkle proofs). Database seemed like a lot. I wanted something closer to an in memory store like Redis, but I wanted better redundancy / cold storage, and thus the idea for RIP came to be.
 
 ## Usage from browser js client
 

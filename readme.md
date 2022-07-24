@@ -19,7 +19,7 @@ Here are some problems with setting up a db for your dapp
 5. They usually don't give users provenance over their data
 6. Encryption / key management is a pain
 
-If a traditional db seems overkill for your use case, RIP might be for you. It gives you the speed of in memory cache (redis) but the decentralization of a global netowrk (Filecoin + IPFS).
+If a traditional db seems overkill for your use case, RIP might be for you. It gives you the speed of in memory cache (redis) but the decentralization of a global netowrk (Filecoin + IPFS), with some ther goodies like encryption.
 
 ### Example use case
 

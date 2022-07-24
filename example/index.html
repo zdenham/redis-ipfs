@@ -26,13 +26,16 @@
         <h2>Set</h2>
         <hr />
         <h3>Key</h3>
-        <input
-          type="text"
-          value="exampleKey"
-          id="setKey"
-          oninput="onSetKeyChange()"
-        />
+        <p>
+          Choose a "key" to use to reference your data (or feel free to use the
+          random one below).
+        </p>
+        <input type="text" id="setKey" oninput="onSetKeyChange()" />
         <h3>Value</h3>
+        <p>
+          The JSON data to be stored. Click
+          <button>here</button> to generate new dummy data
+        </p>
         <textarea class="json" disabled id="setValue"></textarea>
         <div class="timeVals">
           <div id="setBenchmark">
@@ -43,7 +46,7 @@
             <div class="timeMs">N/A</div>
             <div class="timeLabel">IPFS upload time ms</div>
           </div>
-          <button id="runSetButton" onclick="runSet()">
+          <button class="button" id="runSetButton" onclick="runSet()">
             <div class="hidden"></div>
             <div>Set Data</div>
           </button>
@@ -51,7 +54,7 @@
         <h2>Get</h2>
         <hr />
         <h3>Key</h3>
-        <input type="text" value="exampleKey" id="getKey" />
+        <input disabled type="text" value="exampleKey" id="getKey" />
         <h3>Value</h3>
         <textarea class="json" disabled id="getValue"></textarea>
         <div class="timeVals">
@@ -63,7 +66,7 @@
             <div class="timeMs">N/A</div>
             <div class="timeLabel">IPFS fetch time ms</div>
           </div>
-          <button onclick="runGet()" id="runGetButton">
+          <button class="button" onclick="runGet()" id="runGetButton">
             <div class="hidden"></div>
             <div>Get Data</div>
           </button>
@@ -71,11 +74,11 @@
         <h2>Purge</h2>
         <hr />
         <h3>Key</h3>
-        <input type="text" value="exampleKey" id="purgeKey" />
+        <input disabled type="text" value="exampleKey" id="purgeKey" />
         <div class="timeVals">
           <div></div>
           <div></div>
-          <button onclick="runPurge()" id="runPurgeButton">
+          <button class="button" onclick="runPurge()" id="runPurgeButton">
             <div class="hidden"></div>
             <div>Purge Cache</div>
           </button>
@@ -83,13 +86,13 @@
       </div>
       <h1>🔥 🔥 🔥 🔥 🔥 🔥 🔥 🔥 🔥 🔥 🔥 🔥 🔥 🔥 🔥 🔥 🔥 🔥 🔥</h1>
       <h1>Encryption</h1>
-      <button id="litConnectButton" onclick="connectLit()">
+      <button class="button" id="litConnectButton" onclick="connectLit()">
         Connect to Encrypt Data
       </button>
       <h2>Encrypted Set</h2>
       <hr />
       <h3>Key</h3>
-      <input type="text" value="exampleKey" id="encryptedSetKey" />
+      <input disabled type="text" value="exampleKey" id="encryptedSetKey" />
       <h3>Value</h3>
       <div style="height: 300px">
         <textarea class="json" disabled id="encryptedSetValue"></textarea>
@@ -103,7 +106,11 @@
           <div class="timeMs">N/A</div>
           <div class="timeLabel">IPFS upload time ms</div>
         </div>
-        <button id="runEncryptedSetButton" onclick="runEncryptedSet()">
+        <button
+          class="button"
+          id="runEncryptedSetButton"
+          onclick="runEncryptedSet()"
+        >
           <div class="hidden"></div>
           <div>Encrypt and Set Data</div>
         </button>
@@ -111,7 +118,7 @@
       <h2>Decrypted Get</h2>
       <hr />
       <h3>Key</h3>
-      <input type="text" value="exampleKey" id="decryptedGetKey" />
+      <input disabled type="text" value="exampleKey" id="decryptedGetKey" />
       <h3>Value</h3>
       <textarea class="json" disabled id="decryptedGetValue"></textarea>
       <div class="timeVals">
@@ -123,7 +130,11 @@
           <div class="timeMs">N/A</div>
           <div class="timeLabel">IPFS fetch time ms</div>
         </div>
-        <button id="runDecryptedGetButon" onclick="runDecryptedGet()">
+        <button
+          class="button"
+          id="runDecryptedGetButon"
+          onclick="runDecryptedGet()"
+        >
           <div class="hidden"></div>
           <div>Get Data</div>
         </button>
@@ -153,7 +164,7 @@
         border-bottom: 1px dashed lightgrey;
       }
 
-      button {
+      .button {
         background: black;
         border-radius: 5px;
         color: white;
@@ -368,15 +379,24 @@
         }
       };
 
-      const fetchSampleJSON = async () => {
+      const init = async () => {
         const res = await fetch('/json/example.json');
         const json = await res.json();
         const text = JSON.stringify(json, null, 2);
         document.getElementById('setValue').value = text;
         document.getElementById('encryptedSetValue').value = text;
+
+        const keyValue =
+          'exampleKey-' + (Math.random() + 1).toString(36).substring(7);
+
+        document.getElementById('setKey').value = keyValue;
+        document.getElementById('getKey').value = keyValue;
+        document.getElementById('purgeKey').value = keyValue;
+        document.getElementById('encryptedSetKey').value = keyValue;
+        document.getElementById('decryptedGetKey').value = keyValue;
       };
 
-      const onSetKeyChange = (e) => {
+      const onSetKeyChange = () => {
         const value = document.getElementById('setKey').value;
         document.getElementById('getKey').value = value;
         document.getElementById('purgeKey').value = value;
@@ -515,7 +535,7 @@
         stopLoadingButton('runEncryptedGetButton');
       };
 
-      fetchSampleJSON();
+      init();
     </script>
     <script
       onload="LitJsSdk.litJsSdkLoadedInALIT()"

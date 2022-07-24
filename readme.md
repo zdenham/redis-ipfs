@@ -6,9 +6,20 @@ RipDB is a dead simple, fast, decentralized JSON store and corresponding javascr
 
 ## Motivation
 
-I've found that I am able to get very far building dapps without ANY self hosted database at all. There are so many great services that do the hard work of indexing and caaching blockchain data and are trivial to query with a simple network request.
+The SQL database is an amazing and powerful tool unrivaled for storing and querying relational data.
 
-BUT, every now and then I find myself wanting to slice the data in a slightly different way
+BUT, I believe most Dapps can live without a traditional SQL database in favor of something more light weight and decentralized.
+
+Here are some problems with setting up a db for your dapp
+
+1. There are already many great services which index blockchain data (why reinvent the wheel?)
+2. DBs are expensive to host
+3. Migrations are often a pain
+4. They tend to be centralized / treasure trove for attackers
+5. They usually don't give users provenance over their data
+6. Encryption / key management is a pain
+
+I wanted Rip to feel like web based localstorage, but with decentralization and encryption baked in. I think its getting there and I'm very excited to use it in my upcoming projects!
 
 ## Usage from browser js client
 

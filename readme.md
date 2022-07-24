@@ -6,7 +6,7 @@ RipDB is a dead simple, snappy, decentralized JSON store perfect for fast moving
 
 ## Motivation
 
-The SQL database is an amazing and powerful tool unrivaled for storing and querying relational data.
+The SQL database is a powerful tool unrivaled for storing and querying relational data.
 
 BUT, I believe most Dapps can live without a traditional SQL database in favor of something more light weight and decentralized.
 

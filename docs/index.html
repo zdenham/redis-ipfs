@@ -1,0 +1,565 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>RipDB Demo</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  </head>
+  <body>
+    <div class="half">
+      <div class="imageWrapper">
+        <img class="ripDBImage" src="/images/RipDB.png" />
+      </div>
+      <h1 class="mainText">
+        RipDB is a dead simple, fast, decentralized <br />
+        JSON store built for web3.
+      </h1>
+      <p class="sub">Redis + IPFS = RIP = 😍</p>
+    </div>
+    <div class="secondHalf">
+      <div class="secondHalfInner">
+        <h1>Try it out!</h1>
+        <p>
+          Rip has three functions (for now). Set, Get, and Purge. The following
+          demo interfaces with a live RipDB client and shows how you can use RIP
+          as simple JSON storage for your web3 app.
+        </p>
+        <h2>Set</h2>
+        <hr />
+        <h3>Key</h3>
+        <p>
+          Choose a "key" to use to reference your data (or feel free to use the
+          random one below).
+        </p>
+        <input type="text" id="setKey" oninput="onSetKeyChange()" />
+        <h3>Value</h3>
+        <p>
+          The JSON data to be stored. Click
+          <button onclick="createDummyData()">here</button> to generate new
+          dummy data
+        </p>
+        <textarea class="json" disabled id="setValue"></textarea>
+        <div class="timeVals">
+          <div id="setBenchmark">
+            <div class="timeMs">N/A</div>
+            <div class="timeLabel">RIP set time ms</div>
+          </div>
+          <div id="setBenchmarkIPFS">
+            <div class="timeMs">N/A</div>
+            <div class="timeLabel">IPFS upload time ms</div>
+          </div>
+          <button class="button" id="runSetButton" onclick="runSet()">
+            <div class="hidden"></div>
+            <div>Set Data</div>
+          </button>
+        </div>
+        <h2>Get</h2>
+        <hr />
+        <h3>Key</h3>
+        <input disabled type="text" value="exampleKey" id="getKey" />
+        <h3>Value</h3>
+        <textarea class="json" disabled id="getValue"></textarea>
+        <div class="timeVals">
+          <div id="getBenchmark">
+            <div class="timeMs">N/A</div>
+            <div class="timeLabel">RIP get time ms</div>
+          </div>
+          <div id="getBenchmarkIPFS">
+            <div class="timeMs">N/A</div>
+            <div class="timeLabel">IPFS fetch time ms</div>
+          </div>
+          <button class="button" onclick="runGet()" id="runGetButton">
+            <div class="hidden"></div>
+            <div>Get Data</div>
+          </button>
+        </div>
+        <h2>Purge</h2>
+        <hr />
+        <h3>Key</h3>
+        <input disabled type="text" value="exampleKey" id="purgeKey" />
+        <div class="timeVals">
+          <div></div>
+          <div></div>
+          <button class="button" onclick="runPurge()" id="runPurgeButton">
+            <div class="hidden"></div>
+            <div>Purge Cache</div>
+          </button>
+        </div>
+      </div>
+      <h1>🔥 🔥 🔥 🔥 🔥 🔥 🔥 🔥 🔥 🔥 🔥 🔥 🔥 🔥 🔥 🔥 🔥 🔥 🔥</h1>
+      <h1>Encryption</h1>
+      <button class="button" id="litConnectButton" onclick="connectLit()">
+        Connect to Encrypt Data
+      </button>
+      <h2>Encrypted Set</h2>
+      <hr />
+      <h3>Key</h3>
+      <input disabled type="text" value="exampleKey" id="encryptedSetKey" />
+      <h3>Value</h3>
+      <div style="height: 300px">
+        <textarea class="json" disabled id="encryptedSetValue"></textarea>
+      </div>
+      <div class="timeVals">
+        <div id="encryptedSetBenchmark">
+          <div class="timeMs">N/A</div>
+          <div class="timeLabel">RIP set time ms</div>
+        </div>
+        <div id="encryptedSetBenchmarkIPFS">
+          <div class="timeMs">N/A</div>
+          <div class="timeLabel">IPFS upload time ms</div>
+        </div>
+        <button
+          class="button"
+          id="runEncryptedSetButton"
+          onclick="runEncryptedSet()"
+        >
+          <div class="hidden"></div>
+          <div>Encrypt and Set Data</div>
+        </button>
+      </div>
+      <h2>Decrypted Get</h2>
+      <hr />
+      <h3>Key</h3>
+      <input disabled type="text" value="exampleKey" id="decryptedGetKey" />
+      <h3>Value</h3>
+      <textarea class="json" disabled id="decryptedGetValue"></textarea>
+      <div class="timeVals">
+        <div id="decryptedGetBenchmark">
+          <div class="timeMs">N/A</div>
+          <div class="timeLabel">RIP get time ms</div>
+        </div>
+        <div id="decryptedGetBenchmarkIPFS">
+          <div class="timeMs">N/A</div>
+          <div class="timeLabel">IPFS fetch time ms</div>
+        </div>
+        <button
+          class="button"
+          id="runDecryptedGetButon"
+          onclick="runDecryptedGet()"
+        >
+          <div class="hidden"></div>
+          <div>Get and Decrypt Data</div>
+        </button>
+      </div>
+    </div>
+
+    <style>
+      html,
+      body {
+        font-family: 'Roboto', sans-serif;
+      }
+
+      .hidden {
+        display: none;
+      }
+
+      input {
+        width: 300px;
+        padding: 10px;
+        border-radius: 6px;
+        border: 1px solid lightgrey;
+      }
+
+      hr {
+        width: 100%;
+        border: none;
+        border-bottom: 1px dashed lightgrey;
+      }
+
+      .button {
+        background: black;
+        border-radius: 5px;
+        color: white;
+        padding: 12px 35px;
+        font-weight: bold;
+        font-size: 16px;
+        border: none;
+        cursor: pointer;
+        margin: 25px 0px;
+      }
+
+      .timeVals {
+        display: flex;
+        align-items: center;
+        flex-direction: row;
+        width: 100%;
+        justify-content: space-between;
+      }
+
+      .json {
+        width: 100%;
+        height: 300px;
+        min-height: 300px;
+        color: black;
+        background: #f9f9f9;
+        padding: 15px;
+        border-radius: 15px;
+        border: 1px solid lightgrey;
+        box-sizing: border-box;
+      }
+
+      .json::-webkit-scrollbar {
+        display: none;
+      }
+
+      .sub {
+        font-size: 22px;
+        color: white;
+        text-align: center;
+      }
+
+      .mainText {
+        margin-top: 50px;
+        width: 700px;
+        text-align: center;
+      }
+
+      .timeLabel {
+        color: grey;
+        font-size: 14px;
+      }
+
+      .ripDBImage {
+        width: 300px;
+        height: 300px;
+      }
+
+      .timeMs {
+        font-size: 25px;
+      }
+
+      .imageWrapper {
+        padding: 30px 50px;
+        border-radius: 30px;
+        background: white;
+      }
+
+      .half {
+        color: white;
+        width: 50vw;
+        height: 100vh;
+        position: fixed;
+        flex-direction: column;
+        top: 0px;
+        left: 0px;
+        bottom: 0px;
+        background: black;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      .secondHalf {
+        position: fixed;
+        top: 0px;
+        right: 0px;
+        bottom: 0px;
+        width: 50vw;
+        height: 100vh;
+        overflow-y: scroll;
+        overflow-x: hidden;
+        display: flex;
+        flex-direction: column;
+        padding: 50px;
+        color: black;
+        box-sizing: border-box;
+      }
+
+      .lds-dual-ring {
+        margin-right: 5px;
+        display: inline-block;
+        width: 20px;
+        height: 20px;
+      }
+
+      .lds-dual-ring:after {
+        content: ' ';
+        display: block;
+        width: 16px;
+        height: 16px;
+        margin: 2px;
+        border-radius: 50%;
+        border: 3px solid #fff;
+        border-color: #fff transparent #fff transparent;
+        animation: lds-dual-ring 1.2s linear infinite;
+      }
+
+      @keyframes lds-dual-ring {
+        0% {
+          transform: rotate(0deg);
+        }
+        100% {
+          transform: rotate(360deg);
+        }
+      }
+    </style>
+
+    <script>
+      const baseUrl = 'http://localhost:3500';
+
+      const startLoadingButton = (id) => {
+        const button = document.getElementById(id);
+        const loader = button.children[0];
+        loader.className = 'lds-dual-ring';
+        const content = button.children[1];
+        content.className = 'hidden';
+      };
+
+      const stopLoadingButton = (id) => {
+        const button = document.getElementById(id);
+        const loader = button.children[0];
+        loader.className = 'hidden';
+        const content = button.children[1];
+        content.className = '';
+      };
+
+      const runSet = async () => {
+        startLoadingButton('runSetButton');
+        const key = document.getElementById('setKey').value;
+        const value = document.getElementById('setValue').value;
+
+        const opts = {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: value,
+        };
+
+        const resPromise = fetch(`${baseUrl}/set/${key}`, opts);
+        const res2Promise = fetch(`${baseUrl}/ipfs/set`, opts);
+
+        const res = await resPromise;
+        const json = await res.json();
+        document.getElementById('setBenchmark').children[0].innerText =
+          json.duration.toString();
+
+        const res2 = await res2Promise;
+        const json2 = await res2.json();
+        document.getElementById('setBenchmarkIPFS').children[0].innerText =
+          json2.duration.toString();
+        stopLoadingButton('runSetButton');
+      };
+
+      const runGet = async () => {
+        startLoadingButton('runGetButton');
+        const key = document.getElementById('getKey').value;
+
+        const resPromise = fetch(`${baseUrl}/get/${key}`);
+        const res2Promise = fetch(`${baseUrl}/ipfs/get/${key}`);
+
+        const res = await resPromise;
+        const json = await res.json();
+
+        document.getElementById('getBenchmark').children[0].innerText =
+          json.duration.toString();
+
+        document.getElementById('getValue').value = JSON.stringify(
+          json.wrappedData,
+          null,
+          2
+        );
+
+        const res2 = await res2Promise;
+        const json2 = await res2.json();
+
+        document.getElementById('getBenchmarkIPFS').children[0].innerText =
+          json2.duration.toString();
+
+        stopLoadingButton('runGetButton');
+      };
+
+      const runPurge = async () => {
+        const key = document.getElementById('purgeKey').value;
+        const res = await fetch(`${baseUrl}/purge/${key}`, { method: 'POST' });
+
+        const getDisplay = document.getElementById('getValue');
+
+        if (getDisplay.value.length > 0) {
+          const next = { ...JSON.parse(getDisplay.value), data: '' };
+          getDisplay.value = JSON.stringify(next, null, 2);
+        }
+      };
+
+      const createDummyData = () => {
+        const dummyArray = new Array(70).fill(1).map(() => {
+          return {
+            ens: `${(Math.random() + 1).toString(36).substring(2)}.eth`,
+            address: `0x${(Math.random() + 1).toString(36).substring(2)}`,
+          };
+        });
+
+        const json = {
+          allowListAddresses: [
+            {
+              ens: 'vitalik.eth',
+              address: '0xd8da6bf26964af9d7eed9e03e53415d37aa96045',
+            },
+            ...dummyArray,
+          ],
+        };
+
+        const text = JSON.stringify(json, null, 2);
+        document.getElementById('setValue').value = text;
+        document.getElementById('encryptedSetValue').value = text;
+      };
+
+      const init = async () => {
+        createDummyData();
+
+        const keyValue =
+          'exampleKey-' + (Math.random() + 1).toString(36).substring(7);
+
+        document.getElementById('setKey').value = keyValue;
+        document.getElementById('getKey').value = keyValue;
+        document.getElementById('purgeKey').value = keyValue;
+        document.getElementById('encryptedSetKey').value = keyValue;
+        document.getElementById('decryptedGetKey').value = keyValue;
+      };
+
+      const onSetKeyChange = () => {
+        const value = document.getElementById('setKey').value;
+        document.getElementById('getKey').value = value;
+        document.getElementById('purgeKey').value = value;
+        document.getElementById('encryptedSetKey').value = value;
+        document.getElementById('decryptedGetKey').value = value;
+      };
+
+      // LIT PROTOCOL STUFF HERE
+
+      let authSig;
+      const connectLit = async () => {
+        authSig = await LitJsSdk.checkAndSignAuthMessage({
+          chain: 'ethereum',
+        });
+
+        document.getElementById('litConnectButton').innerText =
+          '✅ Connected and Ready to Encrypt ✅';
+      };
+
+      const getDataUrl = (blob) => {
+        return new Promise((resolve) => {
+          const fr = new FileReader();
+
+          fr.addEventListener(
+            'load',
+            function () {
+              // convert image file to base64 string
+              resolve(fr.result);
+            },
+            false
+          );
+
+          fr.readAsDataURL(blob);
+        });
+      };
+
+      const runEncryptedSet = async () => {
+        startLoadingButton('runEncryptedSetButton');
+        const key = document.getElementById('encryptedSetKey').value;
+        const currData = document.getElementById('encryptedSetValue').value;
+
+        const { encryptedString, symmetricKey } = await LitJsSdk.encryptString(
+          currData
+        );
+
+        // gate it to the connected user
+        const accessControlConditions = [
+          {
+            contractAddress: '',
+            standardContractType: '',
+            chain: 'ethereum',
+            method: '',
+            parameters: [':userAddress'],
+            returnValueTest: {
+              comparator: '=',
+              value: authSig.address,
+            },
+          },
+        ];
+
+        const encryptedSymmetricKey =
+          await window.litNodeClient.saveEncryptionKey({
+            accessControlConditions,
+            symmetricKey,
+            authSig,
+            chain: 'ethereum',
+          });
+
+        const encryptedData = await getDataUrl(encryptedString);
+        const setData = JSON.stringify(
+          {
+            ownerAddress: authSig.address,
+            encryptedSymmetricKey: LitJsSdk.uint8arrayToString(
+              encryptedSymmetricKey,
+              'base16'
+            ),
+            encryptedData,
+          },
+          null,
+          2
+        );
+
+        document.getElementById('encryptedSetValue').value = setData;
+
+        const opts = {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: setData,
+        };
+        const res = await fetch(`${baseUrl}/set/${key}`, opts);
+        const json = await res.json();
+        stopLoadingButton('runEncryptedSetButton');
+      };
+
+      const runDecryptedGet = async () => {
+        startLoadingButton('runDecryptedGetButon');
+        const key = document.getElementById('decryptedGetKey').value;
+        const res = await fetch(`${baseUrl}/get/${key}`);
+
+        const json = await res.json();
+
+        const { encryptedData, encryptedSymmetricKey, ownerAddress } =
+          json.wrappedData.data;
+
+        const accessControlConditions = [
+          {
+            contractAddress: '',
+            standardContractType: '',
+            chain: 'ethereum',
+            method: '',
+            parameters: [':userAddress'],
+            returnValueTest: {
+              comparator: '=',
+              value: ownerAddress,
+            },
+          },
+        ];
+
+        const symmetricKey = await this.litNodeClient.getEncryptionKey({
+          accessControlConditions,
+          toDecrypt: encryptedSymmetricKey,
+          chain: 'ethereum',
+          authSig,
+        });
+
+        const blob = await (await fetch(encryptedData)).blob();
+
+        const decryptedString = await LitJsSdk.decryptString(
+          blob,
+          symmetricKey
+        );
+
+        document.getElementById('decryptedGetValue').value = decryptedString;
+        stopLoadingButton('runDecryptedGetButon');
+      };
+
+      init();
+    </script>
+    <script
+      onload="LitJsSdk.litJsSdkLoadedInALIT()"
+      src="https://jscdn.litgateway.com/index.web.js"
+    ></script>
+  </body>
+</html>

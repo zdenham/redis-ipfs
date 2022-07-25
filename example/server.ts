@@ -1,5 +1,5 @@
 import express from 'express';
-import { RipDBClient } from '../library';
+import { RipDBStorageClient } from '../library';
 import dotenv from 'dotenv';
 import { NFTStorage } from 'nft.storage';
 import { Blob } from 'node:buffer';
@@ -13,7 +13,7 @@ app.use(cors());
 app.use(express.json());
 const port = 3500;
 
-const rip = new RipDBClient({
+const rip = new RipDBStorageClient({
   redisUrl: process.env.REDIS_URL || '',
   ipfsApiKey: process.env.IPFS_KEY || '',
 });

@@ -8,7 +8,7 @@ import fetch from 'cross-fetch';
 // NOTE: RipDB = Redis IPFS JSON database
 // TODO - replace nft.storage with a different ipfs client
 
-export type RipDBClientOptions = {
+export type RipDBStorageClientOptions = {
   redisUrl: string;
   redisUsername?: string;
   redisPassword?: string;
@@ -33,7 +33,7 @@ export type SetBody =
     }
   | {};
 
-export class RipDBClient {
+export class RipDBStorageClient {
   private redisClient: RedisClientType;
   private ipfsClient: NFTStorage;
   private gatewayUrl: string;
@@ -44,7 +44,7 @@ export class RipDBClient {
     redisPassword,
     ipfsApiKey,
     ipfsGatewayBaseUrl,
-  }: RipDBClientOptions) {
+  }: RipDBStorageClientOptions) {
     this.redisClient = createClient({
       url: redisUrl,
       username: redisUsername,

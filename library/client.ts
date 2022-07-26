@@ -4,12 +4,13 @@ import fetch from 'cross-fetch';
 import LitJsSdk from 'lit-js-sdk';
 
 /**
- * This client is meant to be isomorphic
+ * This client is meant to be isomorphic.
  * it can be used on your front end web app
  * or on a node server if you so choose!
  *
  * NOTE: for encryption to work in a server
- * You will need to get user's auth signatures
+ * You will need to pass user's auth signatures
+ * to "overrideEncryptionAuthSig"
  */
 
 export type RipDBClientOptions = {

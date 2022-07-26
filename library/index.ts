@@ -1,8 +1,8 @@
-import { createClient, RedisClientType } from 'redis';
-import retry from 'async-retry';
+import type { RedisClientType } from 'redis';
+// import retry from 'async-retry';
 import { NFTStorage } from 'nft.storage';
 import { CID } from 'nft.storage/src/lib/interface';
-import { Blob } from 'node:buffer';
+
 import fetch from 'cross-fetch';
 
 // NOTE: RipDB = Redis IPFS JSON database
@@ -45,6 +45,15 @@ export class RipDBStorageClient {
     ipfsApiKey,
     ipfsGatewayBaseUrl,
   }: RipDBStorageClientOptions) {
+    this._initRedis(redisUrl, redisUsername, redisPassword);
+
+    this.ipfsClient = new NFTStorage({ token: ipfsApiKey });
+    this.gatewayUrl = ipfsGatewayBaseUrl || 'https://ipfs.io/ipfs';
+  }
+
+  private async _initRedis(redisUrl, redisUsername, redisPassword) {
+    const { createClient } = await import('redis');
+
     this.redisClient = createClient({
       url: redisUrl,
       username: redisUsername,
@@ -52,9 +61,6 @@ export class RipDBStorageClient {
     });
 
     this.redisClient.connect();
-
-    this.ipfsClient = new NFTStorage({ token: ipfsApiKey });
-    this.gatewayUrl = ipfsGatewayBaseUrl || 'https://ipfs.io/ipfs';
   }
 
   private wrapData<T>(dataToWrap: T, config: Wrapper): RipWrapped<T> {
@@ -71,6 +77,7 @@ export class RipDBStorageClient {
     timeStamp = 0
   ) {
     const dataStr = JSON.stringify(value);
+    const { Blob } = await import('node:buffer');
     const blob = new Blob([dataStr], { type: 'application/json' });
     // @ts-ignore
     const cid = await this.ipfsClient.storeBlob(blob);
@@ -99,6 +106,8 @@ export class RipDBStorageClient {
     if (cid === 'pending') {
       throw new Error('Cannot fetch from IPFS, backup is pending');
     }
+
+    const { default: retry } = await import('async-retry');
 
     const awaited = await retry(
       async (bail) => {

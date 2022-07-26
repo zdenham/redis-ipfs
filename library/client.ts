@@ -1,5 +1,4 @@
 import type { RipWrapped } from './index';
-import fetch from 'cross-fetch';
 // @ts-ignore - TODO - declare types
 import LitJsSdk from 'lit-js-sdk';
 
@@ -38,7 +37,7 @@ type AuthSig = {
 };
 
 type LitNodeClient = {
-  connect: () => Promise<void>;
+  connect: (opts?: any) => Promise<void>;
   saveEncryptionKey: (opts: any) => Promise<any>;
   getEncryptionKey: (opts: any) => Promise<any>;
 };
@@ -63,16 +62,17 @@ export class RipDBClient {
 
   private async _init() {
     this.litNodeClient = new LitJsSdk.LitNodeClient({
+      debug: false,
       alertWhenUnauthorized: typeof window !== 'undefined',
-    });
-    await this.litNodeClient.connect();
+    }) as unknown as LitNodeClient;
+    await this.litNodeClient.connect({ debug: false });
   }
 
   public async set<T>(key: string, value: T, opts?: SetOptions): Promise<void> {
     const dataToSet = opts?.encrypted ? this._encryptData(value, opts) : value;
 
     await this._ripServerFetch({
-      path: `/set/${key}`,
+      path: `set/${key}`,
       method: `POST`,
       body: dataToSet,
     });
@@ -83,7 +83,7 @@ export class RipDBClient {
     opts?: GetOptions
   ): Promise<RipWrapped<T>> {
     const rawData = await this._ripServerFetch<MaybeEncryptedData<T>>({
-      path: `/get/${key}`,
+      path: `get/${key}`,
       method: 'GET',
     });
 
@@ -104,7 +104,7 @@ export class RipDBClient {
   // to purge the cache for nw
   public async purge(key: string, authSig: AuthSig) {
     // await this._ripServerFetch({
-    //   path: `/purge/${key}`,
+    //   path: `purge/${key}`,
     //   method: 'POST',
     // });
   }
@@ -138,6 +138,8 @@ export class RipDBClient {
       body: JSON.stringify(body),
     };
 
+    const { default: fetch } = await import('cross-fetch');
+
     const res = await fetch(`${this.ripServerUrl}/${path}`, opts);
 
     return await res.json();
@@ -148,9 +150,13 @@ export class RipDBClient {
     opts: SetOptions
   ): Promise<EncryptedData> {
     const stringified = JSON.stringify(dataToEncrypt);
-    const { encryptedString, symmetricKey } = await LitJsSdk.encryptString(
-      stringified
-    );
+    const resp = await LitJsSdk.encryptString(stringified);
+
+    if (!resp) {
+      throw new Error('Failed to encrypt');
+    }
+
+    const { encryptedString, symmetricKey } = resp;
 
     const authSig =
       opts.overrideEncryptionAuthSig ||
@@ -226,6 +232,10 @@ export class RipDBClient {
 
     const blob = await (await fetch(encryptedData)).blob();
     const decryptedString = await LitJsSdk.decryptString(blob, symmetricKey);
+
+    if (!decryptedString) {
+      throw new Error('Failed to decrypt');
+    }
 
     return JSON.parse(decryptedString);
   }

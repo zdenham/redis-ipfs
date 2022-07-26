@@ -22,7 +22,7 @@ export type Wrapper = {
 };
 
 export type RipWrapped<T> = Wrapper & {
-  data: T | null;
+  data: T;
 };
 
 export type SetBody =

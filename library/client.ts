@@ -45,6 +45,8 @@ type RipServerFetchOptions = {
   body?: Object;
 };
 
+type MaybeEncryptedData<T> = RipWrapped<EncryptedData> | RipWrapped<T>;
+
 export class RipDBClient {
   private ripServerUrl: string;
   private encryptionAuthSig: LitAuthSig;
@@ -52,6 +54,7 @@ export class RipDBClient {
 
   constructor({ ripServerUrl }: RipDBClientOptions) {
     this.ripServerUrl = ripServerUrl;
+    this._init();
   }
 
   private async _init() {
@@ -59,6 +62,57 @@ export class RipDBClient {
       alertWhenUnauthorized: typeof window !== 'undefined',
     });
     await this.litNodeClient.connect();
+  }
+
+  public async set<T>(key: string, value: T, opts?: SetOptions): Promise<void> {
+    const dataToSet = opts?.encrypted ? this._encryptData(value, opts) : value;
+
+    await this._ripServerFetch({
+      path: `/set/${key}`,
+      method: `POST`,
+      body: dataToSet,
+    });
+  }
+
+  public async get<T extends Object>(
+    key: string,
+    opts?: GetOptions
+  ): Promise<RipWrapped<T>> {
+    const rawData = await this._ripServerFetch<MaybeEncryptedData<T>>({
+      path: `/get/${key}`,
+      method: 'GET',
+    });
+
+    if (this._isEncryptedData<T>(rawData)) {
+      const decryptedData = await this._decryptData<T>(rawData.data, opts);
+      return {
+        ...rawData,
+        data: decryptedData,
+      };
+    }
+
+    return rawData;
+  }
+
+  // TODO - add auth to this endpoint
+  // and make it available in the client
+  public async purge(key: string) {
+    // await this._ripServerFetch({
+    //   path: `/purge/${key}`,
+    //   method: 'POST',
+    // });
+  }
+
+  public async signMessageForEncryption() {
+    if (typeof window === 'undefined') {
+      throw new Error('Encryption messages can only be signed in the browser');
+    }
+
+    this.encryptionAuthSig = await LitJsSdk.checkAndSignAuthMessage({
+      chain: 'ethereum',
+    });
+
+    return this.encryptionAuthSig;
   }
 
   private async _ripServerFetch<T>({
@@ -78,81 +132,6 @@ export class RipDBClient {
 
     return await res.json();
   }
-
-  public async signMessageForEncryption() {
-    if (typeof window === 'undefined') {
-      throw new Error('Encryption messages can only be signed in the browser');
-    }
-
-    this.encryptionAuthSig = await LitJsSdk.checkAndSignAuthMessage({
-      chain: 'ethereum',
-    });
-
-    return this.encryptionAuthSig;
-  }
-
-  public async set<T>(key: string, value: T, opts?: SetOptions): Promise<void> {
-    const dataToSet = opts?.encrypted ? this._encryptData(value, opts) : value;
-
-    await this._ripServerFetch({
-      path: `/set/${key}`,
-      method: `POST`,
-      body: dataToSet,
-    });
-  }
-
-  public async get<T>(key: string, opts?: GetOptions): Promise<RipWrapped<T>> {
-    const rawData = await this._ripServerFetch<RipWrapped<EncryptedData | T>>({
-      path: `/get/${key}`,
-      method: 'GET',
-    });
-
-    // @ts-ignore
-    const isEncrypted = rawData.data?.encryptedSymmetricKey;
-    if (isEncrypted) {
-      const decryptedData = await this._decryptData(rawData.data, opts);
-    }
-  }
-
-  runGet = async () => {
-    startLoadingButton('runGetButton');
-    const key = document.getElementById('getKey').value;
-
-    const resPromise = fetch(`${baseUrl}/get/${key}`);
-    const res2Promise = fetch(`${baseUrl}/ipfs/get/${key}`);
-
-    const res = await resPromise;
-    const json = await res.json();
-
-    document.getElementById('getBenchmark').children[0].innerText =
-      json.duration.toString();
-
-    document.getElementById('getValue').value = JSON.stringify(
-      json.wrappedData,
-      null,
-      2
-    );
-
-    const res2 = await res2Promise;
-    const json2 = await res2.json();
-
-    document.getElementById('getBenchmarkIPFS').children[0].innerText =
-      json2.duration.toString();
-
-    stopLoadingButton('runGetButton');
-  };
-
-  runPurge = async () => {
-    const key = document.getElementById('purgeKey').value;
-    const res = await fetch(`${baseUrl}/purge/${key}`, { method: 'POST' });
-
-    const getDisplay = document.getElementById('getValue');
-
-    if (getDisplay.value.length > 0) {
-      const next = { ...JSON.parse(getDisplay.value), data: '' };
-      getDisplay.value = JSON.stringify(next, null, 2);
-    }
-  };
 
   private async _encryptData<T extends Object>(
     dataToEncrypt: T,
@@ -204,8 +183,8 @@ export class RipDBClient {
 
   private async _decryptData<T extends Object>(
     dataToDecrypt: EncryptedData,
-    { overrideEncryptionAuthSig }: GetOptions
-  ) {
+    opts?: GetOptions
+  ): Promise<T> {
     const { encryptedData, encryptedSymmetricKey, ownerAddress } =
       dataToDecrypt;
 
@@ -224,7 +203,7 @@ export class RipDBClient {
     ];
 
     const authSig =
-      overrideEncryptionAuthSig ||
+      opts?.overrideEncryptionAuthSig ||
       this.encryptionAuthSig ||
       (await this.signMessageForEncryption());
 
@@ -239,6 +218,12 @@ export class RipDBClient {
     const decryptedString = await LitJsSdk.decryptString(blob, symmetricKey);
 
     return JSON.parse(decryptedString);
+  }
+
+  private _isEncryptedData<T>(
+    maybeEncryptedData: MaybeEncryptedData<T>
+  ): maybeEncryptedData is RipWrapped<EncryptedData> {
+    return !!(maybeEncryptedData.data as EncryptedData).encryptedSymmetricKey;
   }
 
   private _getDataUrl(blob: Blob) {

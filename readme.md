@@ -75,4 +75,5 @@ Under your environment variables you will need to set IPFS
 - [ ] Expose RIP client and Rip server as node_modules
 - [ ] Implement other Redis operations e.g. scan on the front end client
 - [ ] Maybe, build key -> data models in typescript, get graphql style automatic runtime validation during set based on the typescript models
+      COOL: https://github.com/gcanti/io-ts
 - [ ] Get fancier with user owned access control features

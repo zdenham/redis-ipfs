@@ -34,9 +34,9 @@ In my own project (https://juicelabs.io), I needed some sort of store for a list
 ```javascript
 // Setting up client
 import { RipClient } from './RipClient'
-const ripServerEndpointUrl = '';
+const ripServerUrl = '';
 
-const rip = new RipClient(ripServerEndpointUrl);
+const rip = new RipClient({ ripServerUrl });
 
 ...
 

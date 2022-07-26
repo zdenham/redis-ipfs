@@ -7,6 +7,9 @@ import LitJsSdk from 'lit-js-sdk';
  * This client is meant to be isomorphic
  * it can be used on your front end web app
  * or on a node server if you so choose!
+ *
+ * NOTE: for encryption to work in a server
+ * You will need to get user's auth signatures
  */
 
 export type RipDBClientOptions = {
@@ -96,6 +99,8 @@ export class RipDBClient {
 
   // TODO - add auth to this endpoint
   // and make it available in the client
+  // only an "owner" address should be able
+  // to purge the cache for nw
   public async purge(key: string) {
     // await this._ripServerFetch({
     //   path: `/purge/${key}`,
@@ -112,6 +117,10 @@ export class RipDBClient {
       chain: 'ethereum',
     });
 
+    return this.encryptionAuthSig;
+  }
+
+  public getEncryptionAuthSignature() {
     return this.encryptionAuthSig;
   }
 

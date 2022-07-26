@@ -19,11 +19,11 @@ export type RipDBClientOptions = {
 
 export type SetOptions = {
   encrypted?: boolean;
-  overrideEncryptionAuthSig?: LitAuthSig;
+  overrideEncryptionAuthSig?: AuthSig;
 };
 
 export type GetOptions = {
-  overrideEncryptionAuthSig?: LitAuthSig;
+  overrideEncryptionAuthSig?: AuthSig;
 };
 
 type EncryptedData = {
@@ -32,7 +32,7 @@ type EncryptedData = {
   encryptedData: string;
 };
 
-type LitAuthSig = {
+type AuthSig = {
   address: string;
   signature: string;
 };
@@ -53,7 +53,7 @@ type MaybeEncryptedData<T> = RipWrapped<EncryptedData> | RipWrapped<T>;
 
 export class RipDBClient {
   private ripServerUrl: string;
-  private encryptionAuthSig: LitAuthSig;
+  private encryptionAuthSig: AuthSig;
   private litNodeClient: LitNodeClient;
 
   constructor({ ripServerUrl }: RipDBClientOptions) {
@@ -102,7 +102,7 @@ export class RipDBClient {
   // and make it available in the client
   // only an "owner" address should be able
   // to purge the cache for nw
-  public async purge(key: string) {
+  public async purge(key: string, authSig: AuthSig) {
     // await this._ripServerFetch({
     //   path: `/purge/${key}`,
     //   method: 'POST',

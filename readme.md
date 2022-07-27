@@ -4,6 +4,12 @@ RipDB is a dead simple, snappy, decentralized JSON store perfect for fast moving
 
 ![img](https://i.imgur.com/8KVnLX3.png)
 
+## NOTE! ⚠️⚠️
+
+Rip is a hackathon project and is not production ready just yet, but I'd love to get it there. If you have any interest in using or contributing to RIP, please join our [discord](https://discord.gg/5HQ5V7d5jh).
+
+[![discord](https://i.imgur.com/d1eTfYR.png)](https://discord.gg/5HQ5V7d5jh)
+
 ## Demo
 
 https://zdenham.github.io/redis-ipfs/
@@ -69,6 +75,8 @@ The fastest way to do this on your local is via homebrew.
 ```
 
 Under your environment variables you will need to set IPFS
+
+- TODO (finish instructions lol).
 
 ## TODO
 

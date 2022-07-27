@@ -12,6 +12,11 @@
   <br/>
 </p>
 
+<p align="center">
+  <img src="https://i.imgur.com/9UhC6cR.png" title="Logo"/>
+
+</p>
+
 ## NOTE! ⚠️⚠️
 
 Rip is a proof of concept and not production ready just yet, but I'd love to get it there. If you have any interest in using or contributing to RIP, please join our [discord](https://discord.gg/5HQ5V7d5jh).

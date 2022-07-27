@@ -1,8 +1,16 @@
-# RipDB (Redis + IPFS = RIP)
+<p align="center">
+  <img src="https://i.imgur.com/8KVnLX3m.png" title="Logo"/>
 
-> A dead simple, snappy, decentralized JSON store perfect for fast moving web3 builders. It comes with a javascript client that feels like using localstorage, but has decentralization and encryption baked in.
+</p>
+<p align="center">
 
-![img](https://i.imgur.com/8KVnLX3m.png)
+  <b>
+    🪦 RipDB 🪦
+  </b>
+  <br/>
+  <i>A dead simple, snappy, decentralized JSON store perfect for fast moving web3 builders. It comes with a javascript client that feels like using localstorage, but has decentralization and encryption baked in.</i>
+  <br/>
+</p>
 
 ## NOTE! ⚠️⚠️
 

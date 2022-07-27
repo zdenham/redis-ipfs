@@ -1,4 +1,4 @@
-# RipDB (Redis + IPfs = RIP)
+# RipDB (Redis + IPFS = RIP)
 
 RipDB is a dead simple, snappy, decentralized JSON store perfect for fast moving web3 builders. It comes with a javascript client that feels like using localstorage, but has decentralization and encryption baked in.
 
@@ -39,7 +39,7 @@ In my own project (https://juicelabs.io), I needed some sort of store for a list
 
 ```javascript
 // Setting up client
-import { RipClient } from './RipClient'
+import { RipClient } from 'rip-db-js'
 const ripServerUrl = '';
 
 const rip = new RipClient({ ripServerUrl });

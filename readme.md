@@ -1,8 +1,8 @@
 # RipDB (Redis + IPFS = RIP)
 
-RipDB is a dead simple, snappy, decentralized JSON store perfect for fast moving web3 builders. It comes with a javascript client that feels like using localstorage, but has decentralization and encryption baked in.
+> A dead simple, snappy, decentralized JSON store perfect for fast moving web3 builders. It comes with a javascript client that feels like using localstorage, but has decentralization and encryption baked in.
 
-![img](https://i.imgur.com/8KVnLX3.png)
+![img](https://i.imgur.com/8KVnLX3m.png)
 
 ## NOTE! ⚠️⚠️
 
@@ -10,9 +10,14 @@ Rip is a proof of concept and not production ready just yet, but I'd love to get
 
 [![discord](https://i.imgur.com/d1eTfYR.png)](https://discord.gg/5HQ5V7d5jh)
 
-## Demo
+## Install
 
-https://zdenham.github.io/redis-ipfs/
+```sh
+npm install --save rip-db-js
+
+# or with yarn
+yarn add rip-db-js
+```
 
 ## Motivation
 

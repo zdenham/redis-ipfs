@@ -1,4 +1,4 @@
-import type { RipWrapped } from './index';
+import type { RipWrapped } from './storageClient';
 // @ts-ignore - TODO - declare types
 import LitJsSdk from 'lit-js-sdk';
 

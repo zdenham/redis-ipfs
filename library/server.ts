@@ -1,5 +1,5 @@
 import express from 'express';
-import { RipDBStorageClient } from '../library';
+import { RipDBStorageClient } from '../library/storageClient';
 import dotenv from 'dotenv';
 import cors from 'cors';
 

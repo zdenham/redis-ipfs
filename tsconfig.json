@@ -6,7 +6,6 @@
     "strict": true,
     "esModuleInterop": true,
     "forceConsistentCasingInFileNames": true,
-    "outDir": "./lib/esm",
     "declaration": true,
     "removeComments": true,
     "skipLibCheck": true,

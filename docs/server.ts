@@ -1,5 +1,5 @@
 import express from 'express';
-import { RipDBStorageClient } from '../library/storageClient';
+import { RipDBStorageClient } from '../src/storageClient';
 import dotenv from 'dotenv';
 import { NFTStorage } from 'nft.storage';
 import { Blob } from 'node:buffer';

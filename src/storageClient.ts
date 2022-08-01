@@ -3,11 +3,12 @@ import retry from 'async-retry';
 import { NFTStorage } from 'nft.storage';
 import type { CID } from 'nft.storage/src/lib/interface';
 import { createClient } from 'redis';
-import Blob from 'node:buffer';
 import fetch from 'cross-fetch';
 
-// NOTE: RipDB = Redis IPFS JSON database
+// This is the storage client to be used in a rip server instance
 // TODO - replace nft.storage with a different ipfs client
+
+type BlobType = typeof Blob;
 
 export type RipDBStorageClientOptions = {
   redisUrl: string;
@@ -38,6 +39,7 @@ export class RipDBStorageClient {
   private redisClient: RedisClientType;
   private ipfsClient: NFTStorage;
   private gatewayUrl: string;
+
   constructor({
     redisUrl,
     redisUsername,
@@ -54,6 +56,7 @@ export class RipDBStorageClient {
     this.gatewayUrl = ipfsGatewayBaseUrl || 'https://ipfs.io/ipfs';
     this.redisClient.connect();
   }
+
   private wrapData<T>(dataToWrap: T, config: Wrapper): RipWrapped<T> {
     return {
       ...config,
@@ -61,12 +64,24 @@ export class RipDBStorageClient {
       data: dataToWrap,
     };
   }
+
+  private async _getBlob(): Promise<BlobType> {
+    if (typeof window === 'undefined') {
+      const { Blob: NodeBlob } = await import('node:buffer');
+
+      return NodeBlob as BlobType;
+    }
+
+    return window.Blob;
+  }
+
   private async _backUpDataToIPFSAsync<T>(
     key: string,
     value: T,
     timeStamp = 0
   ) {
     const dataStr = JSON.stringify(value);
+    const Blob = await this._getBlob();
     const blob = new Blob([dataStr], { type: 'application/json' });
     // @ts-ignore
     const cid = await this.ipfsClient.storeBlob(blob);
@@ -83,6 +98,7 @@ export class RipDBStorageClient {
     };
     await this.redisClient.set(key, JSON.stringify(backedUpData));
   }
+
   // fetch from IPFS with exponential backoff
   private async fetchJsonFromIPFS<T>(
     cid: CID | 'pending',
@@ -113,6 +129,7 @@ export class RipDBStorageClient {
     }
     return awaited;
   }
+
   public async set<T extends SetBody>(
     key: string,
     value: T
@@ -123,6 +140,7 @@ export class RipDBStorageClient {
     this._backUpDataToIPFSAsync(key, value, wrapped.setAtTimestamp);
     return wrapped;
   }
+
   public async get<T>(key: string): Promise<RipWrapped<T> | null> {
     const redisVal = await this.redisClient.get(key);
     if (!redisVal) {
@@ -143,6 +161,7 @@ export class RipDBStorageClient {
     this.redisClient.set(key, JSON.stringify(nextWrapped));
     return nextWrapped;
   }
+
   // purge is an explicit function to reclaim some redis space
   // in favor of the IPFS back up. Use this when data is no longer
   // "hot" and fast refresh

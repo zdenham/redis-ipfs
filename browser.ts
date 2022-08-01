@@ -1,1 +1,1 @@
-export { RipDBClient } from './library/client';
+export { RipDBClient } from './src/client';

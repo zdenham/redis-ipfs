@@ -1,14 +1,19 @@
 {
   "name": "rip-db-js",
-  "version": "1.0.2",
-  "description": "",
-  "main": "index.js",
+  "version": "1.0.0",
+  "description": "Redis backed by IPFS",
+  "main": "dist/rip.cjs-node.js",
+  "module": "dist/rip.es-node.js",
+  "browser": {
+    "dist/rip.cjs-node.js": "dist/rip.cjs-browser.js",
+    "dist/rip.es-node.js": "dist/rip.es-browser.js"
+  },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "build": "yarn rollup -c rollup.config.js"
   },
-  "author": "",
-  "license": "ISC",
+  "author": "zac@juicelabs.io",
+  "license": "MIT",
   "dependencies": {
     "@types/async-retry": "^1.4.4",
     "@types/cors": "^2.8.12",
@@ -25,11 +30,27 @@
   },
   "devDependencies": {
     "@rollup/plugin-commonjs": "^22.0.1",
+    "@rollup/plugin-json": "^4.1.0",
     "@rollup/plugin-node-resolve": "^13.3.0",
     "@rollup/plugin-replace": "^4.0.0",
     "@rollup/plugin-typescript": "^8.3.3",
     "rollup": "^2.77.0",
     "rollup-plugin-polyfill-node": "^0.10.2",
     "tslib": "^2.4.0"
-  }
+  },
+  "directories": {
+    "doc": "docs"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/zdenham/redis-ipfs.git"
+  },
+  "keywords": [
+    "redis",
+    "ipfs"
+  ],
+  "bugs": {
+    "url": "https://github.com/zdenham/redis-ipfs/issues"
+  },
+  "homepage": "https://github.com/zdenham/redis-ipfs#readme"
 }

@@ -1,8 +1,10 @@
 import type { RedisClientType } from 'redis';
-// import retry from 'async-retry';
+import retry from 'async-retry';
 import { NFTStorage } from 'nft.storage';
-import { CID } from 'nft.storage/src/lib/interface';
-
+import type { CID } from 'nft.storage/src/lib/interface';
+import { createClient } from 'redis';
+import Blob from 'node:buffer';
+import retry from 'async-retry';
 import fetch from 'cross-fetch';
 
 // NOTE: RipDB = Redis IPFS JSON database
@@ -34,10 +36,9 @@ export type SetBody =
   | {};
 
 export class RipDBStorageClient {
-  private redisClient: RedisClientType | null = null;
+  private redisClient: RedisClientType;
   private ipfsClient: NFTStorage;
   private gatewayUrl: string;
-
   constructor({
     redisUrl,
     redisUsername,
@@ -45,36 +46,15 @@ export class RipDBStorageClient {
     ipfsApiKey,
     ipfsGatewayBaseUrl,
   }: RipDBStorageClientOptions) {
-    this._initRedis(redisUrl, redisUsername, redisPassword);
-
-    this.ipfsClient = new NFTStorage({ token: ipfsApiKey });
-    this.gatewayUrl = ipfsGatewayBaseUrl || 'https://ipfs.io/ipfs';
-  }
-
-  private _getRedisClient(): RedisClientType {
-    if (!this.redisClient) {
-      throw new Error('Redis not initialized yet');
-    }
-
-    return this.redisClient;
-  }
-
-  private async _initRedis(
-    redisUrl: string,
-    redisUsername?: string,
-    redisPassword?: string
-  ) {
-    const { createClient } = await import('redis');
-
     this.redisClient = createClient({
       url: redisUrl,
       username: redisUsername,
       password: redisPassword,
     });
-
+    this.ipfsClient = new NFTStorage({ token: ipfsApiKey });
+    this.gatewayUrl = ipfsGatewayBaseUrl || 'https://ipfs.io/ipfs';
     this.redisClient.connect();
   }
-
   private wrapData<T>(dataToWrap: T, config: Wrapper): RipWrapped<T> {
     return {
       ...config,
@@ -82,34 +62,28 @@ export class RipDBStorageClient {
       data: dataToWrap,
     };
   }
-
   private async _backUpDataToIPFSAsync<T>(
     key: string,
     value: T,
     timeStamp = 0
   ) {
     const dataStr = JSON.stringify(value);
-    const { Blob } = await import('node:buffer');
     const blob = new Blob([dataStr], { type: 'application/json' });
     // @ts-ignore
     const cid = await this.ipfsClient.storeBlob(blob);
-
     // If the setAtTimestamps differ then The data has been
     // updated since the backup started--skip setting the CID
     const curr = await this.get<T>(key);
     if (!curr || curr.setAtTimestamp !== timeStamp) {
       return;
     }
-
     // include the ipfs backup CID in the redis payload
     const backedUpData = {
       ...curr,
       cid,
     };
-
-    await this._getRedisClient().set(key, JSON.stringify(backedUpData));
+    await this.redisClient.set(key, JSON.stringify(backedUpData));
   }
-
   // fetch from IPFS with exponential backoff
   private async fetchJsonFromIPFS<T>(
     cid: CID | 'pending',
@@ -118,19 +92,14 @@ export class RipDBStorageClient {
     if (cid === 'pending') {
       throw new Error('Cannot fetch from IPFS, backup is pending');
     }
-
-    const { default: retry } = await import('async-retry');
-
     const awaited = await retry(
       async (bail) => {
         // if anything throws, we retry
         const res = await fetch(`${this.gatewayUrl}/${cid}`);
-
         if (403 === res.status) {
           bail(new Error('Unauthorized'));
           return;
         }
-
         const data = await res.json();
         return data as T;
       },
@@ -140,38 +109,30 @@ export class RipDBStorageClient {
         maxTimeout: 5 * 60 * 1000, // 5 minutes
       }
     );
-
     if (!awaited) {
       throw new Error('Failed to fetch from IPFS');
     }
-
     return awaited;
   }
-
   public async set<T extends SetBody>(
     key: string,
     value: T
   ): Promise<RipWrapped<T>> {
     const wrapped = this.wrapData(value, { cid: 'pending' });
-    await this._getRedisClient().set(key, JSON.stringify(wrapped));
-
+    await this.redisClient.set(key, JSON.stringify(wrapped));
     // asyncronously upload the data to decentralized storage in the background
     this._backUpDataToIPFSAsync(key, value, wrapped.setAtTimestamp);
-
     return wrapped;
   }
-
   public async get<T>(key: string): Promise<RipWrapped<T> | null> {
-    const redisVal = await this._getRedisClient().get(key);
+    const redisVal = await this.redisClient.get(key);
     if (!redisVal) {
       return null;
     }
-
     const wrapped = JSON.parse(redisVal) as RipWrapped<T>;
     if (wrapped.data) {
       return wrapped;
     }
-
     // data not available in the cache, fetch backup from IPFS
     const cid = wrapped.cid;
     const json = await this.fetchJsonFromIPFS<T>(cid);
@@ -179,33 +140,26 @@ export class RipDBStorageClient {
       ...wrapped,
       data: json,
     };
-
     // update the cache to include the fetched data (asyncrounously)
-    this._getRedisClient().set(key, JSON.stringify(nextWrapped));
-
+    this.redisClient.set(key, JSON.stringify(nextWrapped));
     return nextWrapped;
   }
-
   // purge is an explicit function to reclaim some redis space
   // in favor of the IPFS back up. Use this when data is no longer
   // "hot" and fast refresh
   public async purge(key: string) {
-    const wrappedStr = await this._getRedisClient().get(key);
+    const wrappedStr = await this.redisClient.get(key);
     if (!wrappedStr) {
       return;
     }
-
     const wrapped = JSON.parse(wrappedStr) as RipWrapped<any>;
-
     if (wrapped.cid === 'pending') {
       throw new Error('Cannot purge redis before IPFS backup is complete');
     }
-
     const nextWrapped = {
       ...wrapped,
       data: null,
     };
-
-    await this._getRedisClient().set(key, JSON.stringify(nextWrapped));
+    await this.redisClient.set(key, JSON.stringify(nextWrapped));
   }
 }

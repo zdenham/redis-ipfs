@@ -2,6 +2,7 @@ import typescript from '@rollup/plugin-typescript';
 import commonjs from '@rollup/plugin-commonjs';
 import nodePolyFills from 'rollup-plugin-polyfill-node';
 import { nodeResolve } from '@rollup/plugin-node-resolve';
+import json from '@rollup/plugin-json';
 
 export default [
   {
@@ -13,10 +14,11 @@ export default [
       sourcemap: true,
     },
     plugins: [
-      commonjs(),
       nodeResolve({
         browser: true,
+        preferBuiltins: true,
       }),
+      commonjs(),
       typescript(),
       nodePolyFills(),
     ],
@@ -30,11 +32,14 @@ export default [
       sourcemap: true,
     },
     plugins: [
-      commonjs(),
+      typescript(),
+      json(),
       nodeResolve({
         browser: false,
+        preferBuiltins: true,
+        exportConditions: ['require'],
       }),
-      typescript(),
+      commonjs(),
     ],
   },
 ];

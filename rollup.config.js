@@ -36,7 +36,13 @@ export default [
       intro: 'console.log("IMPORTING BROWSER ESM")',
       sourcemap: true,
     },
-    plugins: [typescript()],
+    plugins: [
+      commonjs(),
+      nodeResolve({
+        browser: true,
+      }),
+      typescript(),
+    ],
   },
   {
     input: 'index.ts',
@@ -46,6 +52,12 @@ export default [
       intro: 'console.log("IMPORTING NODE ESM")',
       sourcemap: true,
     },
-    plugins: [typescript()],
+    plugins: [
+      commonjs(),
+      nodeResolve({
+        browser: false,
+      }),
+      typescript(),
+    ],
   },
 ];

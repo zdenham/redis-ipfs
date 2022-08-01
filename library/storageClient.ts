@@ -4,7 +4,6 @@ import { NFTStorage } from 'nft.storage';
 import type { CID } from 'nft.storage/src/lib/interface';
 import { createClient } from 'redis';
 import Blob from 'node:buffer';
-import retry from 'async-retry';
 import fetch from 'cross-fetch';
 
 // NOTE: RipDB = Redis IPFS JSON database

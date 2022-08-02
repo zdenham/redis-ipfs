@@ -71,7 +71,9 @@ export class RipDBClient {
   }
 
   public async set<T>(key: string, value: T, opts?: SetOptions): Promise<void> {
-    const dataToSet = opts?.encrypted ? this._encryptData(value, opts) : value;
+    const dataToSet = opts?.encrypted
+      ? await this._encryptData(value, opts)
+      : value;
 
     await this._ripServerFetch({
       path: `set/${key}`,

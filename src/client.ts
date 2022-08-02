@@ -1,6 +1,4 @@
 import type { RipWrapped } from './storageClient';
-// @ts-ignore - TODO - declare types
-import LitJsSdk from 'lit-js-sdk';
 
 /**
  * This client is meant to be isomorphic.
@@ -54,20 +52,27 @@ export class RipDBClient {
   private ripServerUrl: string;
   private encryptionAuthSig: AuthSig | undefined;
   private litNodeClient: LitNodeClient;
+  private litJsSdk: any;
 
   constructor({ ripServerUrl }: RipDBClientOptions) {
     this.ripServerUrl = ripServerUrl;
-
-    this.litNodeClient = new LitJsSdk.LitNodeClient({
-      debug: false,
-      alertWhenUnauthorized: typeof window !== 'undefined',
-    }) as unknown as LitNodeClient;
 
     this._init();
   }
 
   private async _init() {
-    await this.litNodeClient.connect({ debug: false });
+    if (typeof window !== 'undefined') {
+      window.global = globalThis;
+    }
+
+    // @ts-ignore - TODO - declare types
+    const { default: LitJsSdk } = await import('lit-js-sdk');
+    this.litJsSdk = LitJsSdk;
+    this.litNodeClient = new this.litJsSdk.LitNodeClient({
+      debug: true,
+      alertWhenUnauthorized: typeof window !== 'undefined',
+    }) as unknown as LitNodeClient;
+    await this.litNodeClient.connect({ debug: true });
   }
 
   public async set<T>(key: string, value: T, opts?: SetOptions): Promise<void> {
@@ -120,7 +125,8 @@ export class RipDBClient {
     if (typeof window === 'undefined') {
       throw new Error('Encryption messages can only be signed in the browser');
     }
-    this.encryptionAuthSig = await LitJsSdk.checkAndSignAuthMessage({
+    debugger;
+    this.encryptionAuthSig = await this.litJsSdk.checkAndSignAuthMessage({
       chain: 'ethereum',
     });
     return this.encryptionAuthSig;
@@ -153,7 +159,7 @@ export class RipDBClient {
     opts: SetOptions
   ): Promise<EncryptedData> {
     const stringified = JSON.stringify(dataToEncrypt);
-    const resp = await LitJsSdk.encryptString(stringified);
+    const resp = await this.litJsSdk.encryptString(stringified);
     if (!resp) {
       throw new Error('Failed to encrypt');
     }
@@ -190,7 +196,7 @@ export class RipDBClient {
     const encryptedData = await this._getDataUrl(encryptedString);
     return {
       ownerAddress: authSig.address,
-      encryptedSymmetricKey: LitJsSdk.uint8arrayToString(
+      encryptedSymmetricKey: this.litJsSdk.uint8arrayToString(
         encryptedSymmetricKey,
         'base16'
       ),
@@ -232,7 +238,10 @@ export class RipDBClient {
     });
 
     const blob = await (await fetch(encryptedData)).blob();
-    const decryptedString = await LitJsSdk.decryptString(blob, symmetricKey);
+    const decryptedString = await this.litJsSdk.decryptString(
+      blob,
+      symmetricKey
+    );
 
     if (!decryptedString) {
       throw new Error('Failed to decrypt');

@@ -7,18 +7,23 @@ import json from '@rollup/plugin-json';
 export default [
   {
     input: 'browser.ts',
+    external: ['lit-js-sdk'], // if users want encryption they can install this module
     output: {
       file: 'dist/rip.es-browser.js',
       format: 'esm',
-      intro: 'console.log("IMPORTING RIP BROWSER ESM")',
+      intro: 'console.log("IMPORTING RIP BROWSER ESM");',
       sourcemap: true,
+      inlineDynamicImports: true,
     },
     plugins: [
       nodeResolve({
         browser: true,
-        preferBuiltins: true,
+        exportConditions: ['require'],
       }),
-      commonjs(),
+      commonjs({
+        esmExternals: true,
+        strictRequires: true,
+      }),
       typescript(),
       nodePolyFills(),
     ],
@@ -31,6 +36,7 @@ export default [
       format: 'esm',
       intro: 'console.log("IMPORTING RIP NODE ESM")',
       sourcemap: true,
+      inlineDynamicImports: true,
     },
     plugins: [
       json(),

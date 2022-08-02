@@ -52,19 +52,21 @@ type MaybeEncryptedData<T> = RipWrapped<EncryptedData> | RipWrapped<T>;
 
 export class RipDBClient {
   private ripServerUrl: string;
-  private encryptionAuthSig: AuthSig;
+  private encryptionAuthSig: AuthSig | undefined;
   private litNodeClient: LitNodeClient;
 
   constructor({ ripServerUrl }: RipDBClientOptions) {
     this.ripServerUrl = ripServerUrl;
-    this._init();
-  }
 
-  private async _init() {
     this.litNodeClient = new LitJsSdk.LitNodeClient({
       debug: false,
       alertWhenUnauthorized: typeof window !== 'undefined',
     }) as unknown as LitNodeClient;
+
+    this._init();
+  }
+
+  private async _init() {
     await this.litNodeClient.connect({ debug: false });
   }
 
@@ -103,6 +105,9 @@ export class RipDBClient {
   // only an "owner" address should be able
   // to purge the cache for nw
   public async purge(key: string, authSig: AuthSig) {
+    console.log('PURGE NOT IMPLEMENTED: ', key, authSig);
+
+    // Keep commented
     // await this._ripServerFetch({
     //   path: `purge/${key}`,
     //   method: 'POST',
@@ -113,11 +118,9 @@ export class RipDBClient {
     if (typeof window === 'undefined') {
       throw new Error('Encryption messages can only be signed in the browser');
     }
-
     this.encryptionAuthSig = await LitJsSdk.checkAndSignAuthMessage({
       chain: 'ethereum',
     });
-
     return this.encryptionAuthSig;
   }
 
@@ -138,8 +141,6 @@ export class RipDBClient {
       body: JSON.stringify(body),
     };
 
-    const { default: fetch } = await import('cross-fetch');
-
     const res = await fetch(`${this.ripServerUrl}/${path}`, opts);
 
     return await res.json();
@@ -151,17 +152,18 @@ export class RipDBClient {
   ): Promise<EncryptedData> {
     const stringified = JSON.stringify(dataToEncrypt);
     const resp = await LitJsSdk.encryptString(stringified);
-
     if (!resp) {
       throw new Error('Failed to encrypt');
     }
-
     const { encryptedString, symmetricKey } = resp;
-
     const authSig =
       opts.overrideEncryptionAuthSig ||
       this.encryptionAuthSig ||
       (await this.signMessageForEncryption());
+
+    if (!authSig) {
+      throw new Error('Auth sig is not defined');
+    }
 
     // gate it to the connected user
     const accessControlConditions = [
@@ -177,16 +179,13 @@ export class RipDBClient {
         },
       },
     ];
-
     const encryptedSymmetricKey = await this.litNodeClient.saveEncryptionKey({
       accessControlConditions,
       symmetricKey,
       authSig,
       chain: 'ethereum',
     });
-
     const encryptedData = await this._getDataUrl(encryptedString);
-
     return {
       ownerAddress: authSig.address,
       encryptedSymmetricKey: LitJsSdk.uint8arrayToString(

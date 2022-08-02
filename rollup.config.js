@@ -30,7 +30,7 @@ export default [
       file: 'dist/rip.es-node.js',
       format: 'esm',
       intro: 'console.log("IMPORTING RIP NODE ESM")',
-      // sourcemap: true,
+      sourcemap: true,
     },
     plugins: [
       json(),

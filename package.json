@@ -1,6 +1,7 @@
 {
   "name": "@rip-db/client",
-  "version": "1.0.1",
+  "version": "1.0.2",
+  "type": "module",
   "description": "Redis backed by IPFS",
   "main": "dist/rip.cjs-node.js",
   "module": "dist/rip.es-node.js",
@@ -10,7 +11,8 @@
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "build": "yarn rollup -c rollup.config.js"
+    "build": "yarn rollup -c rollup.config.js",
+    "dev": "yarn rollup -c rollup.config.js -w"
   },
   "author": "zac@juicelabs.io",
   "license": "MIT",

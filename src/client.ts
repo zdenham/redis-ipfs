@@ -51,7 +51,7 @@ type MaybeEncryptedData<T> = RipWrapped<EncryptedData> | RipWrapped<T>;
 export class RipDBClient {
   private ripServerUrl: string;
   private encryptionAuthSig: AuthSig | undefined;
-  private litNodeClient: LitNodeClient;
+  private litNodeClient: LitNodeClient | undefined;
   private litJsSdk: any;
 
   constructor({ ripServerUrl }: RipDBClientOptions) {
@@ -158,6 +158,10 @@ export class RipDBClient {
     dataToEncrypt: T,
     opts: SetOptions
   ): Promise<EncryptedData> {
+    if (!this.litJsSdk || !this.litNodeClient) {
+      throw new Error('No lit JS SDK initialized');
+    }
+
     const stringified = JSON.stringify(dataToEncrypt);
     const resp = await this.litJsSdk.encryptString(stringified);
     if (!resp) {
@@ -208,6 +212,10 @@ export class RipDBClient {
     dataToDecrypt: EncryptedData,
     opts?: GetOptions
   ): Promise<T> {
+    if (!this.litJsSdk || !this.litNodeClient) {
+      throw new Error('No lit JS SDK initialized');
+    }
+
     const { encryptedData, encryptedSymmetricKey, ownerAddress } =
       dataToDecrypt;
 

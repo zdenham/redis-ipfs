@@ -106,10 +106,12 @@ export class RipDBClient {
   // to purge the cache for nw
   public async purge(key: string, authSig: AuthSig) {
     console.log('PURGE NOT IMPLEMENTED: ', key, authSig);
-    await this._ripServerFetch({
-      path: `purge/${key}`,
-      method: 'POST',
-    });
+
+    // Keep commented
+    // await this._ripServerFetch({
+    //   path: `purge/${key}`,
+    //   method: 'POST',
+    // });
   }
 
   public async signMessageForEncryption() {

@@ -5,24 +5,24 @@ import { nodeResolve } from '@rollup/plugin-node-resolve';
 import json from '@rollup/plugin-json';
 
 export default [
-  // {
-  //   input: 'browser.ts',
-  //   output: {
-  //     file: 'dist/rip.es-browser.js',
-  //     format: 'esm',
-  //     intro: 'console.log("IMPORTING RIP BROWSER ESM")',
-  //     sourcemap: true,
-  //   },
-  //   plugins: [
-  //     nodeResolve({
-  //       browser: true,
-  //       preferBuiltins: true,
-  //     }),
-  //     commonjs(),
-  //     typescript(),
-  //     nodePolyFills(),
-  //   ],
-  // },
+  {
+    input: 'browser.ts',
+    output: {
+      file: 'dist/rip.es-browser.js',
+      format: 'esm',
+      intro: 'console.log("IMPORTING RIP BROWSER ESM")',
+      sourcemap: true,
+    },
+    plugins: [
+      nodeResolve({
+        browser: true,
+        preferBuiltins: true,
+      }),
+      commonjs(),
+      typescript(),
+      nodePolyFills(),
+    ],
+  },
   {
     input: 'index.ts',
     external: ['util'], // fixes circular dependency

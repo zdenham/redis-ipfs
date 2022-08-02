@@ -25,6 +25,7 @@ export default [
   // },
   {
     input: 'index.ts',
+    external: ['util'], // fixes circular dependency
     output: {
       file: 'dist/rip.es-node.js',
       format: 'esm',
@@ -36,6 +37,7 @@ export default [
       typescript(),
       commonjs({
         esmExternals: true,
+        strictRequires: true,
       }),
       nodeResolve({
         browser: false,

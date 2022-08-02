@@ -1,2 +1,2 @@
-export { RipDBStorageClient } from './src/vanillaStorageClient';
-export { RipDBClient } from './src/vanillaClient';
+export { RipDBStorageClient } from './src/storageClient';
+export { RipDBClient } from './src/client';

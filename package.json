@@ -1,6 +1,6 @@
 {
   "name": "@rip-db/client",
-  "version": "1.0.6",
+  "version": "1.0.7",
   "type": "module",
   "description": "Redis backed by IPFS",
   "main": "dist/rip.cjs-node.js",

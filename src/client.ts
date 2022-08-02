@@ -15,7 +15,7 @@ export type RipDBClientOptions = {
 };
 
 export type SetOptions = {
-  encrypted?: boolean;
+  encrypt?: boolean;
   overrideEncryptionAuthSig?: AuthSig;
 };
 
@@ -76,7 +76,7 @@ export class RipDBClient {
   }
 
   public async set<T>(key: string, value: T, opts?: SetOptions): Promise<void> {
-    const dataToSet = opts?.encrypted
+    const dataToSet = opts?.encrypt
       ? await this._encryptData(value, opts)
       : value;
 

@@ -1,6 +1,5 @@
 <p align="center">
   <img src="https://i.imgur.com/8KVnLX3m.png" title="Logo"/>
-
 </p>
 <p align="center">
 
@@ -21,10 +20,10 @@ Rip is a proof of concept and not production ready just yet, but I'd love to get
 ## Install
 
 ```sh
-npm install --save rip-db-js
+npm install --save @rip-db/client
 
 # or with yarn
-yarn add rip-db-js
+yarn add @rip-db/client
 ```
 
 ## Motivation
@@ -56,23 +55,25 @@ In my own project (https://juicelabs.io), I needed some sort of store for a list
   <img src="https://i.imgur.com/9UhC6cR.png" title="Logo"/>
 </p>
 
-## Usage from browser js client
+## Quick Start (works in browser or node.js)
 
-```javascript
+```typescript
 // Setting up client
-import { RipClient } from 'rip-db-js'
+import { RipClient } from '@rip-db/client';
 const ripServerUrl = '';
 
 const rip = new RipClient({ ripServerUrl });
 
 ...
 
-const myJson = { hello: 'RIP world' };
+type MyJsonType = { hello: string; };
+
+const myJson: MyJsonType = { hello: 'RIP world' };
 await rip.set('myJsonKey', myJson, { encrypt: false });
 
 ...
 
-const { data } = await rip.get('myJsonKey');
+const { data } = await rip.get<MyJsonType>('myJsonKey');
 
 ...
 

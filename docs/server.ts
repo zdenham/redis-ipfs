@@ -1,11 +1,10 @@
 import express from 'express';
-import { RipDBStorageClient } from '../src/storageClient';
+import { RipDBStorageClient } from '@rip-db/client';
 import dotenv from 'dotenv';
 import { NFTStorage } from 'nft.storage';
 import { Blob } from 'node:buffer';
 import cors from 'cors';
 import fetch from 'cross-fetch';
-// import LitJsSdk from 'lit-js-sdk';
 
 dotenv.config();
 const app = express();

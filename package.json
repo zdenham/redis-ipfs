@@ -1,12 +1,11 @@
 {
   "name": "@rip-db/client",
-  "version": "1.0.7",
+  "version": "1.0.8",
   "type": "module",
   "description": "Redis backed by IPFS",
-  "main": "dist/rip.cjs-node.js",
+  "main": "dist/rip.es-node.js",
   "module": "dist/rip.es-node.js",
   "browser": {
-    "dist/rip.cjs-node.js": "dist/rip.cjs-browser.js",
     "dist/rip.es-node.js": "dist/rip.es-browser.js"
   },
   "scripts": {

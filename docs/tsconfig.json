@@ -1,0 +1,12 @@
+{
+  "compilerOptions": {
+    "target": "es6",
+    "module": "ES2020",
+    "moduleResolution": "NodeNext",
+    "esModuleInterop": true,
+  },
+  "ts-node": {
+    "esm": true
+  },
+  "exclude": ["node_modules/**"]
+}

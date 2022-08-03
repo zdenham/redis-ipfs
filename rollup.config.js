@@ -3,8 +3,32 @@ import commonjs from '@rollup/plugin-commonjs';
 import nodePolyFills from 'rollup-plugin-polyfill-node';
 import { nodeResolve } from '@rollup/plugin-node-resolve';
 import json from '@rollup/plugin-json';
+import pkg from './package.json';
 
 export default [
+  {
+    input: 'browser.ts',
+    external: ['lit-js-sdk'], // if users want encryption they can install this module separately
+    output: {
+      file: `dist/rip.umd-${pkg.version}.js`,
+      format: 'umd',
+      intro: 'console.log("IMPORTING RIP BROWSER UMD");',
+      name: 'rip',
+      sourcemap: true,
+      inlineDynamicImports: true,
+    },
+    plugins: [
+      nodeResolve({
+        browser: true,
+      }),
+      commonjs({
+        esmExternals: true,
+        strictRequires: true,
+      }),
+      typescript(),
+      nodePolyFills(),
+    ],
+  },
   {
     input: 'browser.ts',
     external: ['lit-js-sdk'], // if users want encryption they can install this module
@@ -18,7 +42,6 @@ export default [
     plugins: [
       nodeResolve({
         browser: true,
-        exportConditions: ['require'],
       }),
       commonjs({
         esmExternals: true,

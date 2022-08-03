@@ -1,6 +1,7 @@
 {
   "name": "@rip-db/server-example",
   "version": "1.0.0",
+  "type": "module",
   "description": "Server implementation to run rip-db",
   "main": "index.ts",
   "scripts": {
@@ -10,7 +11,11 @@
   "author": "zac@juicelabs.io",
   "license": "MIT",
   "dependencies": {
-    "@rip-db/server": "^1.0.1"
+    "@rip-db/server": "^1.0.3",
+    "cors": "^2.8.5",
+    "express": "^4.18.1",
+    "nft.storage": "^7.0.0",
+    "node-fetch": "^3.2.10"
   },
   "repository": {
     "type": "git",
@@ -23,5 +28,8 @@
   "bugs": {
     "url": "https://github.com/zdenham/redis-ipfs/issues"
   },
-  "homepage": "https://github.com/zdenham/redis-ipfs#readme"
+  "homepage": "https://github.com/zdenham/redis-ipfs#readme",
+  "devDependencies": {
+    "ts-node": "^10.9.1"
+  }
 }

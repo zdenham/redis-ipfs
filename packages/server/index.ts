@@ -10,7 +10,7 @@ import type {
   RipWrapped,
   BlobType,
   SetBody,
-} from '../../types';
+} from './types';
 
 // This is the storage client to be used in a rip server instance
 // TODO - replace nft.storage with a different ipfs client

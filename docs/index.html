@@ -72,8 +72,8 @@
         <h3>Value</h3>
         <p>
           The JSON data to be stored. Click
-          <button onclick="createDummyData()">here</button> to generate new
-          dummy data
+          <button id="createDummyDataButton">here</button> to generate new dummy
+          data
         </p>
         <textarea class="json" disabled id="setValue"></textarea>
         <div class="timeVals">
@@ -85,7 +85,7 @@
             <div class="timeMs">N/A</div>
             <div class="timeLabel">IPFS upload time ms</div>
           </div>
-          <button class="button" id="runSetButton" onclick="runSet()">
+          <button class="button" id="runSetButton">
             <div class="hidden"></div>
             <div>Set Data</div>
           </button>
@@ -105,7 +105,7 @@
             <div class="timeMs">N/A</div>
             <div class="timeLabel">IPFS fetch time ms</div>
           </div>
-          <button class="button" onclick="runGet()" id="runGetButton">
+          <button class="button" id="runGetButton">
             <div class="hidden"></div>
             <div>Get Data</div>
           </button>
@@ -117,7 +117,7 @@
         <div class="timeVals">
           <div></div>
           <div></div>
-          <button class="button" onclick="runPurge()" id="runPurgeButton">
+          <button class="button" id="runPurgeButton">
             <div class="hidden"></div>
             <div>Purge Cache</div>
           </button>
@@ -125,7 +125,7 @@
       </div>
       <h1>🔥 🔥 🔥 🔥 🔥 🔥 🔥 🔥 🔥 🔥 🔥 🔥 🔥 🔥 🔥 🔥 🔥 🔥 🔥</h1>
       <h1>Encryption</h1>
-      <button class="button" id="litConnectButton" onclick="connectLit()">
+      <button class="button" id="litConnectButton">
         Connect Wallet to Encrypt Data
       </button>
       <h2>Encrypted Set</h2>
@@ -137,19 +137,9 @@
         <textarea class="json" disabled id="encryptedSetValue"></textarea>
       </div>
       <div class="timeVals">
-        <div id="encryptedSetBenchmark">
-          <div class="timeMs">N/A</div>
-          <div class="timeLabel">RIP set time ms</div>
-        </div>
-        <div id="encryptedSetBenchmarkIPFS">
-          <div class="timeMs">N/A</div>
-          <div class="timeLabel">IPFS upload time ms</div>
-        </div>
-        <button
-          class="button"
-          id="runEncryptedSetButton"
-          onclick="runEncryptedSet()"
-        >
+        <div id="encryptedSetBenchmark"></div>
+        <div id="encryptedSetBenchmarkIPFS"></div>
+        <button class="button" id="runEncryptedSetButton">
           <div class="hidden"></div>
           <div>Encrypt and Set Data</div>
         </button>
@@ -161,27 +151,24 @@
       <h3>Value</h3>
       <textarea class="json" disabled id="decryptedGetValue"></textarea>
       <div class="timeVals">
-        <div id="decryptedGetBenchmark">
-          <div class="timeMs">N/A</div>
-          <div class="timeLabel">RIP get time ms</div>
-        </div>
-        <div id="decryptedGetBenchmarkIPFS">
-          <div class="timeMs">N/A</div>
-          <div class="timeLabel">IPFS fetch time ms</div>
-        </div>
-        <button
-          class="button"
-          id="runDecryptedGetButon"
-          onclick="runDecryptedGet()"
-        >
+        <div id="decryptedGetBenchmark"></div>
+        <div id="decryptedGetBenchmarkIPFS"></div>
+        <button class="button" id="runDecryptedGetButton">
           <div class="hidden"></div>
           <div>Get and Decrypt Data</div>
         </button>
       </div>
     </div>
 
-    <script>
-      const baseUrl = 'https://rip-server.onrender.com';
+    <script type="module">
+      import { RipDBClient } from 'https://rip-db.storage.googleapis.com/rip-client.es-browser1.0.10.js';
+
+      const ripServerUrl = 'http://localhost:3000';
+
+      const rip = new RipDBClient({
+        ripServerUrl,
+        enableEncryption: true,
+      });
 
       const startLoadingButton = (id) => {
         const button = document.getElementById(id);
@@ -212,11 +199,11 @@
           body: value,
         };
 
-        const resPromise = fetch(`${baseUrl}/set/${key}`, opts);
-        const res2Promise = fetch(`${baseUrl}/ipfs/set`, opts);
+        const resPromise = rip.set(key, JSON.parse(value));
+        const res2Promise = fetch(`${ripServerUrl}/ipfs/set`, opts);
 
-        const res = await resPromise;
-        const json = await res.json();
+        const json = await resPromise;
+
         document.getElementById('setBenchmark').children[0].innerText =
           json.duration.toString();
 
@@ -231,17 +218,16 @@
         startLoadingButton('runGetButton');
         const key = document.getElementById('getKey').value;
 
-        const resPromise = fetch(`${baseUrl}/get/${key}`);
-        const res2Promise = fetch(`${baseUrl}/ipfs/get/${key}`);
+        const resPromise = rip.get(key);
+        const res2Promise = fetch(`${ripServerUrl}/ipfs/get/${key}`);
 
-        const res = await resPromise;
-        const json = await res.json();
+        const json = await resPromise;
 
         document.getElementById('getBenchmark').children[0].innerText =
           json.duration.toString();
 
         document.getElementById('getValue').value = JSON.stringify(
-          json.wrappedData,
+          json,
           null,
           2
         );
@@ -257,14 +243,53 @@
 
       const runPurge = async () => {
         const key = document.getElementById('purgeKey').value;
-        const res = await fetch(`${baseUrl}/purge/${key}`, { method: 'POST' });
+
+        await rip.purge(key);
 
         const getDisplay = document.getElementById('getValue');
-
         if (getDisplay.value.length > 0) {
           const next = { ...JSON.parse(getDisplay.value), data: '' };
           getDisplay.value = JSON.stringify(next, null, 2);
         }
+      };
+
+      // LIT PROTOCOL STUFF HERE
+
+      const connectLit = async () => {
+        await rip.signMessageForEncryption();
+        document.getElementById('litConnectButton').innerText =
+          '✅ Connected and Ready to Encrypt ✅';
+      };
+
+      const runEncryptedSet = async () => {
+        startLoadingButton('runEncryptedSetButton');
+        const key = document.getElementById('encryptedSetKey').value;
+        const currData = document.getElementById('encryptedSetValue').value;
+
+        const setData = await rip.set(key, JSON.parse(currData), {
+          encrypt: true,
+        });
+
+        document.getElementById('encryptedSetValue').value = JSON.stringify(
+          setData,
+          null,
+          2
+        );
+        stopLoadingButton('runEncryptedSetButton');
+      };
+
+      const runDecryptedGet = async () => {
+        startLoadingButton('runDecryptedGetButton');
+        const key = document.getElementById('decryptedGetKey').value;
+
+        const decrypted = await rip.get(key);
+
+        document.getElementById('decryptedGetValue').value = JSON.stringify(
+          decrypted,
+          null,
+          2
+        );
+        stopLoadingButton('runDecryptedGetButton');
       };
 
       const createDummyData = () => {
@@ -290,19 +315,6 @@
         document.getElementById('encryptedSetValue').value = text;
       };
 
-      const init = async () => {
-        createDummyData();
-
-        const keyValue =
-          'exampleKey-' + (Math.random() + 1).toString(36).substring(7);
-
-        document.getElementById('setKey').value = keyValue;
-        document.getElementById('getKey').value = keyValue;
-        document.getElementById('purgeKey').value = keyValue;
-        document.getElementById('encryptedSetKey').value = keyValue;
-        document.getElementById('decryptedGetKey').value = keyValue;
-      };
-
       const onSetKeyChange = () => {
         const value = document.getElementById('setKey').value;
         document.getElementById('getKey').value = value;
@@ -311,146 +323,33 @@
         document.getElementById('decryptedGetKey').value = value;
       };
 
-      // LIT PROTOCOL STUFF HERE
+      const init = async () => {
+        createDummyData();
 
-      let authSig;
-      const connectLit = async () => {
-        authSig = await LitJsSdk.checkAndSignAuthMessage({
-          chain: 'ethereum',
-        });
+        const keyValue =
+          'exampleKey-' + (Math.random() + 1).toString(36).substring(7);
 
-        document.getElementById('litConnectButton').innerText =
-          '✅ Connected and Ready to Encrypt ✅';
+        document.getElementById('setKey').value = keyValue;
+        onSetKeyChange();
       };
 
-      const getDataUrl = (blob) => {
-        return new Promise((resolve) => {
-          const fr = new FileReader();
-
-          fr.addEventListener(
-            'load',
-            function () {
-              // convert image file to base64 string
-              resolve(fr.result);
-            },
-            false
-          );
-
-          fr.readAsDataURL(blob);
-        });
-      };
-
-      const runEncryptedSet = async () => {
-        startLoadingButton('runEncryptedSetButton');
-        const key = document.getElementById('encryptedSetKey').value;
-        const currData = document.getElementById('encryptedSetValue').value;
-
-        const { encryptedString, symmetricKey } = await LitJsSdk.encryptString(
-          currData
-        );
-
-        // gate it to the connected user
-        const accessControlConditions = [
-          {
-            contractAddress: '',
-            standardContractType: '',
-            chain: 'ethereum',
-            method: '',
-            parameters: [':userAddress'],
-            returnValueTest: {
-              comparator: '=',
-              value: authSig.address,
-            },
-          },
-        ];
-
-        const encryptedSymmetricKey =
-          await window.litNodeClient.saveEncryptionKey({
-            accessControlConditions,
-            symmetricKey,
-            authSig,
-            chain: 'ethereum',
-          });
-
-        const encryptedData = await getDataUrl(encryptedString);
-        const setData = JSON.stringify(
-          {
-            ownerAddress: authSig.address,
-            encryptedSymmetricKey: LitJsSdk.uint8arrayToString(
-              encryptedSymmetricKey,
-              'base16'
-            ),
-            encryptedData,
-          },
-          null,
-          2
-        );
-
-        document.getElementById('encryptedSetValue').value = setData;
-
-        const opts = {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: setData,
-        };
-        const res = await fetch(`${baseUrl}/set/${key}`, opts);
-        const json = await res.json();
-        stopLoadingButton('runEncryptedSetButton');
-      };
-
-      const runDecryptedGet = async () => {
-        startLoadingButton('runDecryptedGetButon');
-        const key = document.getElementById('decryptedGetKey').value;
-        const res = await fetch(`${baseUrl}/get/${key}`);
-
-        const json = await res.json();
-
-        const { encryptedData, encryptedSymmetricKey, ownerAddress } =
-          json.wrappedData.data;
-
-        const accessControlConditions = [
-          {
-            contractAddress: '',
-            standardContractType: '',
-            chain: 'ethereum',
-            method: '',
-            parameters: [':userAddress'],
-            returnValueTest: {
-              comparator: '=',
-              value: ownerAddress,
-            },
-          },
-        ];
-
-        const symmetricKey = await this.litNodeClient.getEncryptionKey({
-          accessControlConditions,
-          toDecrypt: encryptedSymmetricKey,
-          chain: 'ethereum',
-          authSig,
-        });
-
-        const blob = await (await fetch(encryptedData)).blob();
-
-        const decryptedString = await LitJsSdk.decryptString(
-          blob,
-          symmetricKey
-        );
-
-        document.getElementById('decryptedGetValue').value = decryptedString;
-        stopLoadingButton('runDecryptedGetButon');
-      };
+      // ADD EVENT LISTENERS
+      document.getElementById('runSetButton').addEventListener('click', runSet);
+      document.getElementById('runGetButton').addEventListener('click', runGet);
+      document
+        .getElementById('runPurgeButton')
+        .addEventListener('click', runPurge);
+      document
+        .getElementById('litConnectButton')
+        .addEventListener('click', connectLit);
+      document
+        .getElementById('runEncryptedSetButton')
+        .addEventListener('click', runEncryptedSet);
+      document
+        .getElementById('runDecryptedGetButton')
+        .addEventListener('click', runDecryptedGet);
 
       init();
-    </script>
-
-    <script type="module">
-      import { RipDBClient } from 'https://rip-db.storage.googleapis.com/rip.es-browser.js';
-
-      const ripClient = new RipDBClient({
-        ripServerUrl: 'http://localhost:3000',
-      });
     </script>
 
     <script type="module">
@@ -476,12 +375,11 @@
       const app = initializeApp(firebaseConfig);
       const analytics = getAnalytics(app);
     </script>
-    <!-- <script
+    <script
       onload="LitJsSdk.litJsSdkLoadedInALIT()"
       src="https://jscdn.litgateway.com/index.web.js"
-    ></script> -->
+    ></script>
 
-    <script src="https://storage.googleapis.com/rip-db/rip.umd-1.0.8.js"></script>
     <!-- Place this tag in your head or just before your close body tag. -->
     <script async defer src="https://buttons.github.io/buttons.js"></script>
   </body>

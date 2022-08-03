@@ -1,4 +1,16 @@
-import type { RipWrapped } from '../../types';
+import fetch from 'isomorphic-unfetch';
+import retry from 'async-retry';
+import type {
+  RipWrapped,
+  AuthSig,
+  LitNodeClient,
+  RipDBClientOptions,
+  SetOptions,
+  GetOptions,
+  MaybeEncryptedData,
+  EncryptedData,
+  RipServerFetchOptions,
+} from './types';
 
 /**
  * This client is meant to be isomorphic.
@@ -10,77 +22,30 @@ import type { RipWrapped } from '../../types';
  * to "overrideEncryptionAuthSig"
  */
 
-export type RipDBClientOptions = {
-  ripServerUrl: string;
-};
-
-export type SetOptions = {
-  encrypt?: boolean;
-  overrideEncryptionAuthSig?: AuthSig;
-};
-
-export type GetOptions = {
-  overrideEncryptionAuthSig?: AuthSig;
-};
-
-type EncryptedData = {
-  ownerAddress: string;
-  encryptedSymmetricKey: string;
-  encryptedData: string;
-};
-
-type AuthSig = {
-  address: string;
-  signature: string;
-};
-
-type LitNodeClient = {
-  connect: (opts?: any) => Promise<void>;
-  saveEncryptionKey: (opts: any) => Promise<any>;
-  getEncryptionKey: (opts: any) => Promise<any>;
-};
-
-type RipServerFetchOptions = {
-  path: string;
-  method: 'GET' | 'POST';
-  body?: Object;
-};
-
-type MaybeEncryptedData<T> = RipWrapped<EncryptedData> | RipWrapped<T>;
-
 export class RipDBClient {
   private ripServerUrl: string;
   private encryptionAuthSig: AuthSig | undefined;
   private litNodeClient: LitNodeClient | undefined;
   private litJsSdk: any;
 
-  constructor({ ripServerUrl }: RipDBClientOptions) {
+  constructor({ ripServerUrl, enableEncryption }: RipDBClientOptions) {
     this.ripServerUrl = ripServerUrl;
 
-    this._init();
-  }
-
-  private async _init() {
-    if (typeof window !== 'undefined') {
-      window.global = globalThis;
+    if (enableEncryption) {
+      this._initEncryption();
     }
-
-    // @ts-ignore - TODO - declare types
-    const { default: LitJsSdk } = await import('lit-js-sdk');
-    this.litJsSdk = LitJsSdk;
-    this.litNodeClient = new this.litJsSdk.LitNodeClient({
-      debug: true,
-      alertWhenUnauthorized: typeof window !== 'undefined',
-    }) as unknown as LitNodeClient;
-    await this.litNodeClient.connect({ debug: true });
   }
 
-  public async set<T>(key: string, value: T, opts?: SetOptions): Promise<void> {
+  public async set<T>(
+    key: string,
+    value: T,
+    opts?: SetOptions
+  ): Promise<MaybeEncryptedData<T>> {
     const dataToSet = opts?.encrypt
       ? await this._encryptData(value, opts)
       : value;
 
-    await this._ripServerFetch({
+    return await this._ripServerFetch<MaybeEncryptedData<T>>({
       path: `set/${key}`,
       method: `POST`,
       body: dataToSet,
@@ -107,25 +72,17 @@ export class RipDBClient {
     return rawData;
   }
 
-  // TODO - add auth to this endpoint
-  // and make it available in the client
-  // only an "owner" address should be able
-  // to purge the cache for nw
   public async purge(key: string, authSig: AuthSig) {
-    console.log('PURGE NOT IMPLEMENTED: ', key, authSig);
-
-    // Keep commented
-    // await this._ripServerFetch({
-    //   path: `purge/${key}`,
-    //   method: 'POST',
-    // });
+    await this._ripServerFetch({
+      path: `purge/${key}`,
+      method: 'POST',
+    });
   }
 
   public async signMessageForEncryption() {
     if (typeof window === 'undefined') {
       throw new Error('Encryption messages can only be signed in the browser');
     }
-    debugger;
     this.encryptionAuthSig = await this.litJsSdk.checkAndSignAuthMessage({
       chain: 'ethereum',
     });
@@ -154,12 +111,56 @@ export class RipDBClient {
     return await res.json();
   }
 
+  private async _initEncryption() {
+    this.litJsSdk = await this._getLitSdkWithRetry();
+    this.litNodeClient = new this.litJsSdk.LitNodeClient({
+      debug: true,
+      alertWhenUnauthorized: typeof window !== 'undefined',
+    }) as unknown as LitNodeClient;
+
+    await this.litNodeClient.connect({ debug: true });
+  }
+
+  private async _getLitSdkWithRetry() {
+    // polyfill hack for lit sdk to work in browser
+    if (typeof window !== 'undefined') {
+      window.global = globalThis;
+    }
+
+    const sdk = await retry(
+      async () => {
+        // @ts-ignore return the lit instance if it is defined on the client
+        if (typeof window !== 'undefined' && window.LitJsSdk) {
+          // @ts-ignore
+          return window.LitJsSdk;
+        }
+
+        // @ts-ignore - TODO - declare types
+        const { default: LitJsSdk } = await import('lit-js-sdk');
+        return LitJsSdk;
+      },
+      {
+        retries: 5,
+        factor: 2, // exponential
+        maxTimeout: 5 * 60 * 1000, // 5 minutes
+      }
+    );
+
+    if (!sdk) {
+      throw new Error(
+        'Failed to initialize encryption - lit sdk may not be installed'
+      );
+    }
+
+    return sdk;
+  }
+
   private async _encryptData<T extends Object>(
     dataToEncrypt: T,
     opts: SetOptions
   ): Promise<EncryptedData> {
     if (!this.litJsSdk || !this.litNodeClient) {
-      throw new Error('No lit JS SDK initialized');
+      throw new Error('Encryption not initialized');
     }
 
     const stringified = JSON.stringify(dataToEncrypt);
@@ -213,7 +214,7 @@ export class RipDBClient {
     opts?: GetOptions
   ): Promise<T> {
     if (!this.litJsSdk || !this.litNodeClient) {
-      throw new Error('No lit JS SDK initialized');
+      throw new Error('Encryption not initialized');
     }
 
     const { encryptedData, encryptedSymmetricKey, ownerAddress } =

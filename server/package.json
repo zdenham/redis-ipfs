@@ -1,0 +1,27 @@
+{
+  "name": "@rip-db/server-example",
+  "version": "1.0.0",
+  "description": "Server implementation to run rip-db",
+  "main": "index.ts",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "ts-node index.ts"
+  },
+  "author": "zac@juicelabs.io",
+  "license": "MIT",
+  "dependencies": {
+    "@rip-db/server": "^1.0.1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/zdenham/redis-ipfs.git"
+  },
+  "keywords": [
+    "redis",
+    "ipfs"
+  ],
+  "bugs": {
+    "url": "https://github.com/zdenham/redis-ipfs/issues"
+  },
+  "homepage": "https://github.com/zdenham/redis-ipfs#readme"
+}

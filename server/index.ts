@@ -1,5 +1,5 @@
 import express from 'express';
-import { RipDBStorageClient } from '../../packages/server';
+import { RipDBServerClient } from '@rip-db/server';
 import dotenv from 'dotenv';
 import cors from 'cors';
 
@@ -9,7 +9,7 @@ app.use(cors());
 app.use(express.json());
 const port = 3500;
 
-const ripStorage = new RipDBStorageClient({
+const ripStorage = new RipDBServerClient({
   redisUrl: process.env.REDIS_URL || '',
   ipfsApiKey: process.env.IPFS_KEY || '',
 });

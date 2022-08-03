@@ -161,7 +161,7 @@
     </div>
 
     <script type="module">
-      import { RipDBClient } from 'https://rip-db.storage.googleapis.com/rip-client.es-browser1.0.10.js';
+      import { RipDBClient } from 'https://rip-db.storage.googleapis.com/rip-client.es-browser1.0.12.js';
 
       const ripServerUrl = 'http://localhost:3000';
 
@@ -334,6 +334,9 @@
       };
 
       // ADD EVENT LISTENERS
+      document
+        .getElementById('createDummyDataButton')
+        .addEventListener('click', createDummyData);
       document.getElementById('runSetButton').addEventListener('click', runSet);
       document.getElementById('runGetButton').addEventListener('click', runGet);
       document

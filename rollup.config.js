@@ -34,7 +34,7 @@ export default [
     input: 'packages/client/index.ts',
     external: ['lit-js-sdk'], // if users want encryption they can install this module
     output: {
-      file: `packages/client/dist/rip-client.es-browser${clientPkg.version}.js`,
+      file: `dist/rip-client.es-browser${clientPkg.version}.js`,
       format: 'esm',
       intro: 'console.log("IMPORTING RIP CLIENT BROWSER ESM");',
       sourcemap: true,

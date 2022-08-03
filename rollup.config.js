@@ -5,6 +5,7 @@ import { nodeResolve } from '@rollup/plugin-node-resolve';
 import json from '@rollup/plugin-json';
 import clientPkg from './packages/client/package.json';
 
+// comment -about to mess with rollup
 export default [
   // THE BROWSER CLIENT
   {

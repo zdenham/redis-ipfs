@@ -5,53 +5,39 @@ import { nodeResolve } from '@rollup/plugin-node-resolve';
 import json from '@rollup/plugin-json';
 import clientPkg from './packages/client/package.json';
 
-// comment -about to mess with rollup
+const browserClient = {
+  input: 'packages/client/index.ts',
+  external: ['lit-js-sdk'], // if users want encryption they can install this module
+  output: {
+    file: `packages/client/dist/rip-client.es-browser.js`,
+    format: 'esm',
+    intro: 'console.log("IMPORTING RIP CLIENT BROWSER ESM");',
+    sourcemap: true,
+    inlineDynamicImports: true,
+  },
+  plugins: [
+    nodeResolve({
+      browser: true,
+    }),
+    commonjs({
+      esmExternals: true,
+      strictRequires: true,
+    }),
+    typescript(),
+    nodePolyFills(),
+  ],
+};
+
 export default [
   // THE BROWSER CLIENT
-  {
-    input: 'packages/client/index.ts',
-    external: ['lit-js-sdk'], // if users want encryption they can install this module
-    output: {
-      file: `packages/client/dist/rip-client.es-browser.js`,
-      format: 'esm',
-      intro: 'console.log("IMPORTING RIP CLIENT BROWSER ESM");',
-      sourcemap: true,
-      inlineDynamicImports: true,
-    },
-    plugins: [
-      nodeResolve({
-        browser: true,
-      }),
-      commonjs({
-        esmExternals: true,
-        strictRequires: true,
-      }),
-      typescript(),
-      nodePolyFills(),
-    ],
-  },
+  browserClient,
   // THE BROWSER CLIENT (FOR CDN)
   {
-    input: 'packages/client/index.ts',
-    external: ['lit-js-sdk'], // if users want encryption they can install this module
+    ...browserClient,
     output: {
+      ...browserClient.output,
       file: `dist/rip-client.es-browser${clientPkg.version}.js`,
-      format: 'esm',
-      intro: 'console.log("IMPORTING RIP CLIENT BROWSER ESM");',
-      sourcemap: true,
-      inlineDynamicImports: true,
     },
-    plugins: [
-      nodeResolve({
-        browser: true,
-      }),
-      commonjs({
-        esmExternals: true,
-        strictRequires: true,
-      }),
-      typescript(),
-      nodePolyFills(),
-    ],
   },
   // THE NODE CLIENT
   {

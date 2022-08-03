@@ -21,7 +21,6 @@ const browserClient = {
     }),
     commonjs({
       esmExternals: true,
-      strictRequires: true,
     }),
     typescript(),
     nodePolyFills(),
@@ -55,7 +54,6 @@ export default [
       typescript(),
       commonjs({
         esmExternals: true,
-        strictRequires: true,
       }),
       nodeResolve({
         browser: false,

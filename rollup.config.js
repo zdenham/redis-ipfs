@@ -8,32 +8,9 @@ import pkg from './package.json';
 export default [
   {
     input: 'browser.ts',
-    external: ['lit-js-sdk'], // if users want encryption they can install this module separately
-    output: {
-      file: `dist/rip.umd-${pkg.version}.js`,
-      format: 'umd',
-      intro: 'console.log("IMPORTING RIP BROWSER UMD");',
-      name: 'rip',
-      sourcemap: true,
-      inlineDynamicImports: true,
-    },
-    plugins: [
-      nodeResolve({
-        browser: true,
-      }),
-      commonjs({
-        esmExternals: true,
-        strictRequires: true,
-      }),
-      typescript(),
-      nodePolyFills(),
-    ],
-  },
-  {
-    input: 'browser.ts',
     external: ['lit-js-sdk'], // if users want encryption they can install this module
     output: {
-      file: 'dist/rip.es-browser.js',
+      file: `dist/rip.es-browser-${pkg.version}.js`,
       format: 'esm',
       intro: 'console.log("IMPORTING RIP BROWSER ESM");',
       sourcemap: true,
@@ -55,7 +32,7 @@ export default [
     input: 'index.ts',
     external: ['util'], // fixes circular dependency
     output: {
-      file: 'dist/rip.es-node.js',
+      file: `dist/rip.es-node-${pkg.version}.js`,
       format: 'esm',
       intro: 'console.log("IMPORTING RIP NODE ESM")',
       sourcemap: true,

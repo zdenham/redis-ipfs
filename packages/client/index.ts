@@ -1,4 +1,4 @@
-import type { RipWrapped } from './storageClient';
+import type { RipWrapped } from '../../types';
 
 /**
  * This client is meant to be isomorphic.

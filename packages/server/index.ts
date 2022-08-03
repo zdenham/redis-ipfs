@@ -4,38 +4,18 @@ import { NFTStorage } from 'nft.storage';
 import type { CID } from 'nft.storage/src/lib/interface';
 import { createClient } from 'redis';
 import fetch from 'cross-fetch';
+import type {
+  RipDBServerClientOptions,
+  Wrapper,
+  RipWrapped,
+  BlobType,
+  SetBody,
+} from '../../types';
 
 // This is the storage client to be used in a rip server instance
 // TODO - replace nft.storage with a different ipfs client
 
-type BlobType = typeof Blob;
-
-export type RipDBStorageClientOptions = {
-  redisUrl: string;
-  redisUsername?: string;
-  redisPassword?: string;
-  ipfsApiKey: string;
-  ipfsGatewayBaseUrl?: string;
-};
-
-export type Wrapper = {
-  cid: CID | 'pending';
-  setAtTimestamp?: number;
-};
-
-export type RipWrapped<T> = Wrapper & {
-  data: T;
-};
-
-export type SetBody =
-  | {
-      encryptedSymmetricKey: string;
-      encryptedData: string;
-      ownerAddress: string;
-    }
-  | {};
-
-export class RipDBStorageClient {
+export class RipDBServerClient {
   private redisClient: RedisClientType;
   private ipfsClient: NFTStorage;
   private gatewayUrl: string;
@@ -46,7 +26,7 @@ export class RipDBStorageClient {
     redisPassword,
     ipfsApiKey,
     ipfsGatewayBaseUrl,
-  }: RipDBStorageClientOptions) {
+  }: RipDBServerClientOptions) {
     this.redisClient = createClient({
       url: redisUrl,
       username: redisUsername,
@@ -152,7 +132,7 @@ export class RipDBStorageClient {
     }
     // data not available in the cache, fetch backup from IPFS
     const cid = wrapped.cid;
-    const json = await this.fetchJsonFromIPFS<T>(cid);
+    const json = await this.fetchJsonFromIPFS<T>(cid as unknown as CID);
     const nextWrapped = {
       ...wrapped,
       data: json,

@@ -3,7 +3,7 @@ import retry from 'async-retry';
 import { NFTStorage } from 'nft.storage';
 import type { CID } from 'nft.storage/src/lib/interface';
 import { createClient } from 'redis';
-import fetch from 'cross-fetch';
+import fetch from 'node-fetch';
 import type {
   RipDBServerClientOptions,
   Wrapper,

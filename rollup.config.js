@@ -2,7 +2,6 @@ import typescript from '@rollup/plugin-typescript';
 import commonjs from '@rollup/plugin-commonjs';
 import nodePolyFills from 'rollup-plugin-polyfill-node';
 import { nodeResolve } from '@rollup/plugin-node-resolve';
-import json from '@rollup/plugin-json';
 import clientPkg from './packages/client/package.json';
 
 const browserClient = {
@@ -40,8 +39,8 @@ export default [
   },
   // THE NODE CLIENT
   {
-    input: 'packages/client/index.ts',
-    external: ['util', 'lit-js-sdk'], // util - fixes circular dependency
+    input: './packages/client/index.ts',
+    external: (id) => !/^[./]/.test(id),
     output: {
       file: `packages/client/dist/rip-client.es-node.js`,
       format: 'esm',
@@ -49,23 +48,12 @@ export default [
       sourcemap: true,
       inlineDynamicImports: true,
     },
-    plugins: [
-      json(),
-      typescript(),
-      commonjs({
-        esmExternals: true,
-      }),
-      nodeResolve({
-        browser: false,
-        preferBuiltins: true,
-        exportConditions: ['require'],
-      }),
-    ],
+    plugins: [typescript()],
   },
   // THE NODE SERVER CLIENT
   {
-    input: 'packages/server/index.ts',
-    external: ['util'], // fixes circular dependency
+    input: './packages/server/index.ts',
+    external: (id) => !/^[./]/.test(id),
     output: {
       file: `packages/server/dist/rip-server.es-node.js`,
       format: 'esm',
@@ -73,18 +61,6 @@ export default [
       sourcemap: true,
       inlineDynamicImports: true,
     },
-    plugins: [
-      json(),
-      typescript(),
-      commonjs({
-        esmExternals: true,
-        strictRequires: true,
-      }),
-      nodeResolve({
-        browser: false,
-        preferBuiltins: true,
-        exportConditions: ['require'],
-      }),
-    ],
+    plugins: [typescript()],
   },
 ];

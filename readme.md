@@ -35,7 +35,7 @@ yarn add @rip-db/client
 
 # Quick Start
 
-The quickest way to get started testing out rip-db is with the rip sandbox server. If you want to run a production instance of rip, see the [running your own server section](https://github.com/zdenham/redis-ipfs#running-your-own-ripdb-server).
+The quickest way to get started testing out rip-db is with the rip sandbox server (example below). If you want to run a production instance of rip, see the [running your own server section](https://github.com/zdenham/redis-ipfs#running-your-own-ripdb-server).
 
 ```javascript
 import { RipDBClient } from '@rip-db/client';
@@ -47,14 +47,12 @@ const rip = new RipClient({ ripServerUrl });
 
 ...
 
-type MyJsonType = { hello: string; };
-
-const myJson: MyJsonType = { hello: 'RIP world' };
+const myJson = { hello: 'RIP world' };
 await rip.set('myJsonKey', myJson, { encrypt: false });
 
 ...
 
-const { data } = await rip.get<MyJsonType>('myJsonKey');
+const { data } = await rip.get('myJsonKey');
 
 ...
 

@@ -3,7 +3,7 @@
 </p>
 <p align="center">
 
-  <b style="font-size: 40px;">
+  <b>
     🪦 RipDB 🪦
   </b>
   <br/>
@@ -35,7 +35,7 @@ yarn add @rip-db/client
 
 # Quick Start
 
-The quickest way to get started testing out rip-db is with the rip sandbox server (example below). If you want to run a production instance of rip, see the [running your own server section](https://github.com/zdenham/redis-ipfs#running-your-own-ripdb-server).
+The quickest way to test out rip-db is with the rip sandbox server (example below). If you want to run a production instance of rip, see the [running your own server section](https://github.com/zdenham/redis-ipfs#running-your-own-ripdb-server).
 
 ```javascript
 import { RipDBClient } from '@rip-db/client';
@@ -68,6 +68,10 @@ await rip.purge('myJsonKey');
 <p align="center">
   <img src="https://i.imgur.com/9UhC6cR.png" title="Logo"/>
 </p>
+
+## Demo
+
+See the speed for yourself on the rip [demo site](https://zdenham.github.io/redis-ipfs).
 
 # Motivation
 

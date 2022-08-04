@@ -47,6 +47,7 @@ const rip = new RipClient({ ripServerUrl });
 
 ...
 
+// See encryption section below on how to anable encryption
 const myJson = { hello: 'RIP world' };
 await rip.set('myJsonKey', myJson, { encrypt: false });
 
@@ -93,6 +94,52 @@ Many web3 developers choose to store their data as JSON directly on IPFS rather 
 If a traditional db seems overkill for your use case, and interacting directly with IPFS seems a bit too slow, RIP might be for you.
 
 It gives you the speed of in memory cache (redis) but the decentralization of a global network (Filecoin + IPFS), with some ther goodies like encryption.
+
+# E2E Encryption
+
+Rip offers easy E2E encryption for user data via [lit protocol](https://litprotocol.com). In order to use encryption you will need to install the lit javascript sdk.
+
+#### Via Package Manager
+
+```ssh
+> npm install lit-js-sdk
+```
+
+#### Via Script Tag
+
+```html
+<script
+  onload="LitJsSdk.litJsSdkLoadedInALIT()"
+  src="https://jscdn.litgateway.com/index.web.js"
+></script>
+```
+
+### Using Encryption with Rip Client
+
+```javascript
+const ripServerUrl = 'https://rip-sandbox.onrender.com';
+
+// Enable encryption during client initialization
+// Rip will automatically use lit-js-sdk for encryption
+const rip = new RipClient({ ripServerUrl, enableEncryption: true });
+
+...
+
+// you need a one time wallet signature to
+// prove identity for encryption and decryption
+await rip.signMessageForEncryption()
+
+...
+
+// make sure to pass encrypt: true option
+const myJson = { hello: 'Encrypted RIP world' };
+await rip.set('myJsonKey', myJson, { encrypt: true });
+
+...
+
+// rip automatically decrypts
+const { data } = await rip.get('myJsonKey');
+```
 
 # Running your own Rip Server
 

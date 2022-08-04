@@ -1,0 +1,15 @@
+{
+  "name": "rip-node-example",
+  "version": "1.0.0",
+  "description": "Rip node.js example",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node index.mjs"
+  },
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "@rip-db/client": "^1.0.14"
+  }
+}

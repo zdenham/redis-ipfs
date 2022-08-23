@@ -262,7 +262,8 @@ export class RipDBClient {
   private _isEncryptedData<T>(
     maybeEncryptedData: MaybeEncryptedData<T>
   ): maybeEncryptedData is RipWrapped<EncryptedData> {
-    return !!(maybeEncryptedData.data as EncryptedData).encryptedSymmetricKey;
+    return !!(maybeEncryptedData?.data as EncryptedData | undefined)
+      ?.encryptedSymmetricKey;
   }
 
   private _getDataUrl(blob: Blob) {

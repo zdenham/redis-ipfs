@@ -35,6 +35,9 @@ export class RipDBServerClient {
     this.ipfsClient = new NFTStorage({ token: ipfsApiKey });
     this.gatewayUrl = ipfsGatewayBaseUrl || 'https://ipfs.io/ipfs';
     this.redisClient.connect();
+    this.redisClient.on('error', (e) => {
+      console.log('REDIS ERROR: ', e);
+    });
   }
 
   private wrapData<T>(dataToWrap: T, config: Wrapper): RipWrapped<T> {

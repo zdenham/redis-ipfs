@@ -7,7 +7,7 @@
     🪦 RipDB 🪦
   </b>
   <br/>
-  A snappy, decentralized JSON store perfect for fast moving web3 builders. <br/> <a href="https;">Redis</a> + <a href="https://ipfs.io/" target="_blank">IPFS</a> = RIP = 😍
+  A snappy, decentralized JSON store perfect for fast-moving web3 builders. <br/> <a href="https;">Redis</a> + <a href="https://ipfs.io/" target="_blank">IPFS</a> = RIP = 😍
 </p>
 
 # Install
@@ -47,7 +47,7 @@ const rip = new RipClient({ ripServerUrl });
 
 ...
 
-// See encryption section below on how to anable encryption
+// See encryption section below on how to enable encryption
 const myJson = { hello: 'RIP world' };
 await rip.set('myJsonKey', myJson, { encrypt: false });
 
@@ -76,28 +76,28 @@ See the speed for yourself on the rip [demo site](https://zdenham.github.io/redi
 
 # Motivation
 
-The SQL database is a powerful tool unrivaled for storing and querying relational data.
+The SQL database is a powerful tool unrivalled for storing and querying relational data.
 
 **BUT**, I believe most dapps can live without a traditional SQL database in favor of something more light weight and decentralized.
 
-Here are some problems with setting up a db for your dapp
+Here are some problems with setting up a DB for your dapp
 
 1. There are already many great services which index blockchain data (why reinvent the wheel?)
 2. DBs are expensive to host
 3. Migrations are often a pain
-4. They tend to be centralized / treasure trove for attackers
+4. They tend to be centralized / treasure troves for attackers
 5. They usually don't give users provenance over their data
 6. Encryption / key management is a pain
 
 Many web3 developers choose to store their data as JSON directly on IPFS rather than a traditional DB, but IPFS upload times can be slow and gateway timeouts are brutal.
 
-If a traditional db seems overkill for your use case, and interacting directly with IPFS seems a bit too slow, RIP might be for you.
+If a traditional DB seems overkill for your use case and interacting directly with IPFS seems a bit too slow, RIP might be for you.
 
-It gives you the speed of in memory cache (redis) but the decentralization of a global network (Filecoin + IPFS), with some ther goodies like encryption.
+It gives you the speed of in memory-cache (Redis) but the decentralization of a global network (Filecoin + IPFS), with some other goodies like encryption.
 
 # E2E Encryption
 
-Rip offers easy E2E encryption for user data via [lit protocol](https://litprotocol.com). In order to use encryption you will need to install the lit javascript sdk.
+Rip offers easy E2E encryption for user data via [lit protocol](https://litprotocol.com). In order to use encryption, you will need to install the `lit` javascript SDK.
 
 #### Via Package Manager
 
@@ -125,7 +125,7 @@ const rip = new RipClient({ ripServerUrl, enableEncryption: true });
 
 ...
 
-// you need a one time wallet signature to
+// you need a one-time wallet signature to
 // prove identity for encryption and decryption
 await rip.signMessageForEncryption()
 
@@ -190,7 +190,7 @@ Under your environment variables you will need to set IPFS
 
 #### Point Your Rip Client to the Server
 
-Once your server is live, you can point your rip client to the server by initializing it with `ripServerUrl` that points to your server instance url.
+Once your server is live, you can point your rip client to the server by initializing it with `ripServerUrl` which points to your server instance URL.
 
 # Contributing
 

@@ -30,6 +30,7 @@ app.get('/get/:key', async (req, res) => {
   try {
     wrappedData = await ripServer.get(req.params.key);
   } catch (e) {
+    console.log('GOT THE ERROR MESSAGE: ', e.message);
     if (e.message === 'No value stored with this key') {
       res.status(404).send('Not Found');
       return;

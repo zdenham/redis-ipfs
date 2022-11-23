@@ -85,7 +85,8 @@ app.get('/ipfs/get/:key', async (req, res) => {
     const duration = Date.now() - startTime;
     res.send({ duration });
   } catch (e) {
-    if (e.message === 'No value stored with this key') {
+    console.log('THE MESSAGE: ', e.message);
+    if (e.message.indexOf('No value stored with this key') !== -1) {
       res.status(404).send('Not Found');
       return;
     }

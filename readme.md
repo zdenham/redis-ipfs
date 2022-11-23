@@ -35,7 +35,7 @@ yarn add @rip-db/client
 
 # Quick Start
 
-The quickest way to test out rip-db is with the rip sandbox server (example below). If you want to run a production instance of rip, see the [running your own server section](https://github.com/zdenham/redis-ipfs#running-your-own-ripdb-server).
+The quickest way to test out rip-db is with the rip sandbox server (example below). If you want to run a production instance of rip, see the [running your own server section](https://github.com/zdenham/redis-ipfs#running-your-own-rip-server).
 
 ```javascript
 import { RipDBClient } from '@rip-db/client';

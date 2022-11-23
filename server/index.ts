@@ -72,17 +72,25 @@ app.post('/ipfs/set', async (req, res) => {
 });
 
 app.get('/ipfs/get/:key', async (req, res) => {
-  // read CID from RIPDB
-  const response = await ripServer.get(req.params.key);
-  if (!response) {
-    throw new Error('No value stored with this key');
-  }
-  const { cid } = response;
-  const startTime = Date.now();
+  try {
+    // read CID from RIPDB
+    const response = await ripServer.get(req.params.key);
+    if (!response) {
+      throw new Error('No value stored with this key');
+    }
+    const { cid } = response;
+    const startTime = Date.now();
 
-  await fetch(`https://ipfs.io/ipfs/${cid}`);
-  const duration = Date.now() - startTime;
-  res.send({ duration });
+    await fetch(`https://ipfs.io/ipfs/${cid}`);
+    const duration = Date.now() - startTime;
+    res.send({ duration });
+  } catch (e) {
+    if (e.message === 'No value stored with this key') {
+      res.status(404).send('Not Found');
+      return;
+    }
+    throw e;
+  }
 });
 
 app.listen(port, () => {

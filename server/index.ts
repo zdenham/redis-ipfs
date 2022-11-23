@@ -26,7 +26,15 @@ app.post('/set/:key', async (req, res) => {
 
 app.get('/get/:key', async (req, res) => {
   const start = Date.now();
-  const wrappedData = await ripServer.get(req.params.key);
+  try {
+    const wrappedData = await ripServer.get(req.params.key);
+  } catch (e) {
+    if (e.message === 'No value stored with this key') {
+      res.status(404).send('Not Found');
+      return;
+    }
+    throw e;
+  }
 
   res.send({ duration: Date.now() - start, ...wrappedData });
 });

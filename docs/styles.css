@@ -119,6 +119,35 @@ hr {
   box-sizing: border-box;
 }
 
+html, body {
+  margin: 0;
+}
+
+@media only screen and (max-width: 768px) {
+  .half {
+    width: 100vw;
+    min-height: 100vh;
+    position: relative;
+    overflow-x: hidden;
+  }
+
+  .secondHalf {
+    width: 100vw;
+    position: relative;
+  }
+
+  .mainText {
+    font-size: 18px;
+    width: 300px;
+  }
+
+  .fixed-pos {
+    width: 100vw !important;
+    background: black;
+    z-index: 1000;
+  }
+}
+
 .lds-dual-ring {
   margin-right: 5px;
   display: inline-block;
